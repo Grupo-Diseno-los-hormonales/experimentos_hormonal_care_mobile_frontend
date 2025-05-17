@@ -11,13 +11,13 @@ import '../../domain/models/prescriptionpost_model.dart';
 import '../../domain/models/medicaltype_model.dart';
 
 class MedicalRecordService {
-  final String baseUrl = 'http://localhost:8080/api/v1/medical-record/patient/record';
-  final String profileBaseUrl = 'http://localhost:8080/api/v1/profile/profile';
-  final String medicationsUrl = 'http://localhost:8080/api/v1/medical-record/medications';
-  final String prescriptionsUrl = 'http://localhost:8080/api/v1/medical-record/medications/prescriptions';
-  final String treatmentsUrl = 'http://localhost:8080/api/v1/medical-record/treatments/medicalRecordId'; // URL base para tratamientos
-  final String treatmentspostUrl = 'http://localhost:8080/api/v1/medical-record/treatments'; // URL base para tratamientos
-  final String medicaltypesUrl = 'http://localhost:8080/api/v1/medical-record/medications/medicationTypes';
+  final String baseUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/patient/record';
+  final String profileBaseUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/profile/profile';
+  final String medicationsUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/medications';
+  final String prescriptionsUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/medications/prescriptions';
+  final String treatmentsUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/treatments/medicalRecordId'; // URL base para tratamientos
+  final String treatmentspostUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/treatments'; // URL base para tratamientos
+  final String medicaltypesUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/medications/medicationTypes';
 
 
   Future<Patient> getPatientById(String patientId) async {
@@ -184,7 +184,7 @@ Future<http.Response> updatePersonalHistory(int patientId, String personalHistor
   };
 
   final response = await http.put(
-    Uri.parse('http://localhost:8080/api/v1/medical-record/patient/personal-history/$patientId'),
+    Uri.parse('https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/patient/personal-history/$patientId'),
     headers: headers,
     body: json.encode({'personalHistory': personalHistory}),
   );
@@ -200,7 +200,7 @@ Future<http.Response> updateFamilyHistory(int patientId, String familyHistory) a
   };
 
   final response = await http.put(
-    Uri.parse('http://localhost:8080/api/v1/medical-record/patient/family-history/$patientId'),
+    Uri.parse('https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/patient/family-history/$patientId'),
     headers: headers,
     body: json.encode({'familyHistory': familyHistory}),
   );

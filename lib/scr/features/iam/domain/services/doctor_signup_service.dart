@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class DoctorSignUpService {
-  static final String baseUrl = 'http://localhost:8080/api/v1';
+  static final String baseUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1';
    static Future<void> signUpDoctor(
     String username,
     String password,

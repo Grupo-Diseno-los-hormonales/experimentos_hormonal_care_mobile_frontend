@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 
 class PatientService {
-  final String baseUrl = 'http://localhost:8080/api/v1/medical-record/patient';
+  final String baseUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1/medical-record/patient';
 
   Future<Map<String, dynamic>> fetchPatientDetails(int patientId) async {
     final token = await JwtStorage.getToken();

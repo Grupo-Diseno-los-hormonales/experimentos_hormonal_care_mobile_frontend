@@ -5,7 +5,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class MedicalAppointmentApi {
-  static const String _baseUrl = 'http://localhost:8080/api/v1';
+  static const String _baseUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1';
 
   MedicalAppointmentApi() {
     tz.initializeTimeZones();

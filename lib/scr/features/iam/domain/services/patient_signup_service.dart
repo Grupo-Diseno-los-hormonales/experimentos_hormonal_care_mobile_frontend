@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/domain/services/auth_service.dart';
 
 class PatientSignUpService {
-  static final String baseUrl = 'http://localhost:8080/api/v1';
+  static final String baseUrl = 'https://experimentos-hormonal-care-backend-production.up.railway.app/api/v1';
 
   static Future<void> signUpPatient(
     String username,
