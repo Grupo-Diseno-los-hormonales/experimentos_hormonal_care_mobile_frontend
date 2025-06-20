@@ -143,6 +143,8 @@ class CommunicationApi {
       // Si no existe, crear nueva conversación
       print('➕ Creando nueva conversación...');
       final newConversation = await createConversation([currentUserId, doctorId]);
+
+      print('Nueva conversación creada: $newConversation');
       
       // Intentar obtener el ID real de la nueva conversación
       await Future.delayed(Duration(milliseconds: 500)); // Esperar un poco
@@ -191,11 +193,15 @@ class CommunicationApi {
     print('➕ === CREANDO NUEVA CONVERSACIÓN ===');
     print('Participantes: $participantIds');
 
+    // Crear el cuerpo de la solicitud con los IDs de los participantes
     final requestBody = {'participantIds': participantIds};
 
     final response = await http.post(
       Uri.parse('$_baseUrl/conversations'),
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
       body: jsonEncode(requestBody),
     );
 
@@ -205,11 +211,23 @@ class CommunicationApi {
     if (response.statusCode == 201) {
       final result = jsonDecode(response.body);
       print('✅ Conversación creada exitosamente');
-      return result;
+
+      // Verifica si el 'id' está en el resultado
+      if (result.containsKey('id')) {
+        print('Nuevo ID de conversación: ${result['id']}');
+        // Si todo es correcto, devolver el resultado completo
+        return result;
+      } else {
+        print('Error: No se encontró el ID de la conversación en la respuesta.');
+        throw Exception('No conversation ID returned');
+      }
     } else {
+      print('❌ Error al crear la conversación: ${response.statusCode} - ${response.body}');
       throw Exception('Failed to create conversation: ${response.statusCode} - ${response.body}');
     }
   }
+
+
 
   // Obtener conversaciones del usuario actual
   Future<List<Map<String, dynamic>>> getMyConversations() async {

@@ -268,15 +268,15 @@ class _DoctorChatScreenState extends State<DoctorChatScreen> {
     try {
       final conversations = await _communicationApi.getConversationsByUserId(currentUserId);
       Map<String, dynamic>? existingConversation;
-      
+
       for (var conversation in conversations) {
         final participants = conversation['participants'] as List<dynamic>? ?? [];
-        
+
         bool doctorInConversation = participants.any((participant) {
           final participantUserId = participant['userId'];
           return participantUserId == _doctorProfileId;
         });
-        
+
         if (doctorInConversation) {
           existingConversation = conversation;
           break;
@@ -284,16 +284,19 @@ class _DoctorChatScreenState extends State<DoctorChatScreen> {
       }
 
       if (existingConversation != null) {
-        _conversationId = existingConversation['id'];
+        _conversationId = existingConversation['id'];  // Aquí asignamos el ID de la conversación
+        print('Conversación existente encontrada: $_conversationId');
       } else {
         final participantIds = [currentUserId, _doctorProfileId!];
         final newConversation = await _communicationApi.createConversation(participantIds);
-        _conversationId = newConversation['id'];
+        _conversationId = newConversation['id'];  // Aquí asignamos el nuevo ID de la conversación
+        print('Nueva conversación creada: $_conversationId');
       }
     } catch (e) {
       throw Exception('Error al gestionar la conversación: $e');
     }
   }
+
 
   Future<void> _loadMessages() async {
     if (_conversationId == null) return;
