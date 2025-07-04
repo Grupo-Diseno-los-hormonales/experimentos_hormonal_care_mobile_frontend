@@ -1,4 +1,5 @@
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/medical_record/diagnosis/domain/usecases/fakechat_api.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -7,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart'; // Importa la librería intl para formatear fechas
 import 'package:flutter_spinbox/flutter_spinbox.dart'; // Importa la librería flutter_spinbox para usar SpinBox
+import 'package:provider/provider.dart';
 import '../../../medical_prescription/domain/models/patient_model.dart';
 import '../../domain/models/medication_model.dart';
 import '../../domain/models/prescription_model.dart';
@@ -1302,78 +1304,290 @@ class _ChatLocalWidgetState extends State<_ChatLocalWidget> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            itemCount: _messages.length,
-            itemBuilder: (context, idx) {
-              final msg = _messages[idx];
-              final isMe = msg['senderProfileId'] == widget.doctorProfileId;
-              return ListTile(
-                title: Align(
-                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+ // Reemplazar el método build de _ChatLocalWidgetState:
+@override
+Widget build(BuildContext context) {
+  return Consumer<ThemeProvider>(
+    builder: (context, themeProvider, child) {
+      if (_loading) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8F7193)),
+          ),
+        );
+      }
+      
+      return Column(
+        children: [
+          // Header del chat
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: themeProvider.isDarkMode 
+                  ? Color(0xFF2D2D2D)
+                  : Color(0xFF8F7193),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: themeProvider.isDarkMode 
+                      ? Color(0xFF8F7193)
+                      : Color(0xFFA788AB),
+                  child: Icon(
+                    Icons.chat,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Chat with Patient',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Área de mensajes
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: themeProvider.isDarkMode 
+                    ? Color(0xFF1A1A1A) 
+                    : Colors.grey[50],
+                border: Border.all(
+                  color: themeProvider.isDarkMode 
+                      ? Colors.white12 
+                      : Colors.grey.withOpacity(0.2),
+                ),
+              ),
+              child: _messages.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline,
+                            size: 48,
+                            color: themeProvider.isDarkMode 
+                                ? Colors.white54 
+                                : Colors.grey[400],
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Start a conversation',
+                            style: TextStyle(
+                              color: themeProvider.isDarkMode 
+                                  ? Colors.white70 
+                                  : Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.all(8),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, idx) {
+                        final msg = _messages[idx];
+                        final isDoctor = msg['senderProfileId'] == widget.doctorProfileId;
+                        final timestamp = msg['sentAt'] != null 
+                            ? DateTime.tryParse(msg['sentAt']) 
+                            : null;
+                        
+                        return Container(
+                          margin: EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            mainAxisAlignment: isDoctor 
+                                ? MainAxisAlignment.end 
+                                : MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!isDoctor) ...[
+                                CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: Color(0xFF4CAF50),
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(width: 6),
+                              ],
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: isDoctor 
+                                      ? CrossAxisAlignment.end 
+                                      : CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      constraints: BoxConstraints(
+                                        maxWidth: MediaQuery.of(context).size.width * 0.7,
+                                      ),
+                                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: isDoctor 
+                                            ? Color(0xFF8F7193)
+                                            : (themeProvider.isDarkMode 
+                                                ? Color(0xFF3A3A3A) 
+                                                : Colors.white),
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(16),
+                                          topRight: Radius.circular(16),
+                                          bottomLeft: Radius.circular(isDoctor ? 16 : 4),
+                                          bottomRight: Radius.circular(isDoctor ? 4 : 16),
+                                        ),
+                                        border: !isDoctor ? Border.all(
+                                          color: themeProvider.isDarkMode 
+                                              ? Colors.white24 
+                                              : Colors.grey.withOpacity(0.3),
+                                        ) : null,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: themeProvider.isDarkMode 
+                                                ? Colors.black.withOpacity(0.3)
+                                                : Colors.grey.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Text(
+                                        msg['text'] ?? '',
+                                        style: TextStyle(
+                                          // ✅ TEXTO LEGIBLE EN AMBOS MODOS
+                                          color: isDoctor 
+                                              ? Colors.white // Doctor: blanco sobre morado
+                                              : (themeProvider.isDarkMode 
+                                                  ? Colors.white // Paciente modo oscuro: blanco sobre gris oscuro
+                                                  : Colors.black87), // Paciente modo claro: negro sobre blanco
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    if (timestamp != null) ...[
+                                      SizedBox(height: 4),
+                                      Text(
+                                        DateFormat('hh:mm a').format(timestamp),
+                                        style: TextStyle(
+                                          color: themeProvider.isDarkMode 
+                                              ? Colors.white54 
+                                              : Colors.grey[500],
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              if (isDoctor) ...[
+                                SizedBox(width: 6),
+                                CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: Color(0xFF8F7193),
+                                  child: Icon(
+                                    Icons.medical_services,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ),
+          
+          // Divisor
+          Container(
+            height: 1,
+            color: themeProvider.isDarkMode 
+                ? Colors.white24 
+                : Colors.grey.withOpacity(0.3),
+          ),
+          
+          // Input para escribir mensaje
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: themeProvider.isDarkMode 
+                  ? Color(0xFF2D2D2D)
+                  : Colors.white,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
                   child: Container(
-                    padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isMe ? Color(0xFFE2D1F4) : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(msg['text'] ?? ''),
-                  ),
-                ),
-                subtitle: Align(
-                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Text(
-                    msg['sentAt'] != null
-                        ? DateFormat('hh:mm a').format(DateTime.parse(msg['sentAt']))
-                        : '',
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        Divider(height: 1),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: InputDecoration(
-                    hintText: 'Type a message...',
-                    border: OutlineInputBorder(
+                      color: themeProvider.isDarkMode 
+                          ? Color(0xFF1A1A1A) 
+                          : Colors.grey[200],
                       borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide.none,
+                      border: Border.all(
+                        color: themeProvider.isDarkMode 
+                            ? Colors.white24 
+                            : Colors.transparent,
+                      ),
                     ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
+                    child: TextField(
+                      controller: _controller,
+                      style: TextStyle(
+                        color: themeProvider.isDarkMode 
+                            ? Colors.white 
+                            : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Type a message...',
+                        hintStyle: TextStyle(
+                          color: themeProvider.isDarkMode 
+                              ? Colors.white54 
+                              : Colors.grey[500],
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      ),
+                      textCapitalization: TextCapitalization.sentences,
+                      maxLines: null,
+                      onSubmitted: (_) => _sendMessage(),
+                    ),
                   ),
-                  textCapitalization: TextCapitalization.sentences,
-                  maxLines: null,
-                  onSubmitted: (_) => _sendMessage(),
                 ),
-              ),
-              SizedBox(width: 8),
-              FloatingActionButton(
-                mini: true,
-                backgroundColor: Color(0xFFA78AAB),
-                child: Icon(Icons.send, color: Colors.white),
-                onPressed: _sendMessage,
-              ),
-            ],
+                SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFF8F7193),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.send, color: Colors.white),
+                    onPressed: _sendMessage,
+                    iconSize: 20,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
+    },
+  );
+}
 }

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
-
+import 'package:provider/provider.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
 
 class DoctorChatScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -88,80 +89,381 @@ class _DoctorChatScreenState extends State<DoctorChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.doctor['fullName'] ?? 'Doctor'),
-        backgroundColor: const Color(0xFFA78AAB),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    controller: _scrollController,
-                    itemCount: _messages.length,
-                    itemBuilder: (context, idx) {
-                      final msg = _messages[idx];
-                      final isMe = msg.senderId == widget.currentUserId;
-                      return ListTile(
-                        title: Align(
-                          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: isMe ? const Color(0xFFE2D1F4) : Colors.grey[200],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(msg.text),
-                          ),
-                        ),
-                        subtitle: Align(
-                          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                          child: Text(
-                            DateFormat('hh:mm a').format(msg.timestamp),
-                            style: const TextStyle(fontSize: 10),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-            child: Row(
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          backgroundColor: themeProvider.isDarkMode 
+              ? Color(0xFF1E1E1E) 
+              : Color(0xFFF5F5F5),
+          appBar: AppBar(
+            title: Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: const InputDecoration(
-                      hintText: 'Type a message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(24)),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Color(0xFFF5F5F5),
-                    ),
-                    textCapitalization: TextCapitalization.sentences,
-                    maxLines: null,
-                    onSubmitted: (_) => _sendMessage(),
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: themeProvider.isDarkMode 
+                      ? Color(0xFF8F7193) 
+                      : Color(0xFFA78AAB),
+                  child: Icon(
+                    Icons.medical_services,
+                    size: 16,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 8),
-                FloatingActionButton(
-                  mini: true,
-                  backgroundColor: const Color(0xFFA78AAB),
-                  child: const Icon(Icons.send, color: Colors.white),
-                  onPressed: _sendMessage,
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    widget.doctor['fullName'] ?? 'Doctor',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
+            backgroundColor: themeProvider.isDarkMode 
+                ? Color(0xFF8F7193) 
+                : Color(0xFFA78AAB),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+            actions: [
+              Container(
+                margin: EdgeInsets.only(right: 8),
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle, color: Colors.white, size: 8),
+                        SizedBox(width: 4),
+                        Text(
+                          'En línea',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+          body: Column(
+            children: [
+              // Área de mensajes
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: themeProvider.isDarkMode 
+                        ? Color(0xFF1A1A1A) 
+                        : Colors.grey[50],
+                  ),
+                  child: _isLoading
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  themeProvider.isDarkMode 
+                                      ? Color(0xFF8F7193) 
+                                      : Color(0xFFA78AAB),
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'Cargando conversación...',
+                                style: TextStyle(
+                                  color: themeProvider.isDarkMode 
+                                      ? Colors.white70 
+                                      : Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : _messages.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.chat_bubble_outline,
+                                    size: 64,
+                                    color: themeProvider.isDarkMode 
+                                        ? Colors.white54 
+                                        : Colors.grey[400],
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    '¡Hola! 👋',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: themeProvider.isDarkMode 
+                                          ? Colors.white 
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Inicia una conversación con tu doctor',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: themeProvider.isDarkMode 
+                                          ? Colors.white70 
+                                          : Colors.grey[600],
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              controller: _scrollController,
+                              padding: EdgeInsets.all(16),
+                              itemCount: _messages.length,
+                              itemBuilder: (context, idx) {
+                                final msg = _messages[idx];
+                                final isMe = msg.senderId == widget.currentUserId;
+                                
+                                return Container(
+                                  margin: EdgeInsets.only(bottom: 16),
+                                  child: Row(
+                                    mainAxisAlignment: isMe 
+                                        ? MainAxisAlignment.end 
+                                        : MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (!isMe) ...[
+                                        CircleAvatar(
+                                          radius: 16,
+                                          backgroundColor: themeProvider.isDarkMode 
+                                              ? Color(0xFF8F7193) 
+                                              : Color(0xFFA78AAB),
+                                          child: Icon(
+                                            Icons.medical_services,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                      ],
+                                      Flexible(
+                                        child: Column(
+                                          crossAxisAlignment: isMe 
+                                              ? CrossAxisAlignment.end 
+                                              : CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context).size.width * 0.75,
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 16, 
+                                                vertical: 12,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: isMe 
+                                                    ? Color(0xFF4CAF50)
+                                                    : (themeProvider.isDarkMode 
+                                                        ? Color(0xFF3A3A3A) 
+                                                        : Colors.white),
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(20),
+                                                  topRight: Radius.circular(20),
+                                                  bottomLeft: Radius.circular(isMe ? 20 : 6),
+                                                  bottomRight: Radius.circular(isMe ? 6 : 20),
+                                                ),
+                                                border: !isMe ? Border.all(
+                                                  color: themeProvider.isDarkMode 
+                                                      ? Colors.white24 
+                                                      : Colors.grey.withOpacity(0.2),
+                                                ) : null,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: themeProvider.isDarkMode 
+                                                        ? Colors.black.withOpacity(0.3)
+                                                        : Colors.grey.withOpacity(0.1),
+                                                    blurRadius: 4,
+                                                    offset: Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Text(
+                                                msg.text,
+                                                style: TextStyle(
+                                                  color: isMe 
+                                                      ? Colors.white
+                                                      : (themeProvider.isDarkMode 
+                                                          ? Colors.white 
+                                                          : Colors.black87),
+                                                  fontSize: 16,
+                                                  height: 1.4,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              DateFormat('hh:mm a').format(msg.timestamp),
+                                              style: TextStyle(
+                                                color: themeProvider.isDarkMode 
+                                                    ? Colors.white54 
+                                                    : Colors.grey[500],
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (isMe) ...[
+                                        SizedBox(width: 8),
+                                        CircleAvatar(
+                                          radius: 16,
+                                          backgroundColor: Color(0xFF4CAF50),
+                                          child: Icon(
+                                            Icons.person,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                ),
+              ),
+              
+              // Divisor
+              Container(
+                height: 1,
+                color: themeProvider.isDarkMode 
+                    ? Colors.white12 
+                    : Colors.grey.withOpacity(0.3),
+              ),
+              
+              // Input para escribir mensaje
+              Container(
+                decoration: BoxDecoration(
+                  color: themeProvider.isDarkMode 
+                      ? Color(0xFF2D2D2D) 
+                      : Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: themeProvider.isDarkMode 
+                          ? Colors.black.withOpacity(0.3)
+                          : Colors.grey.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: Offset(0, -2),
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.all(16),
+                child: SafeArea(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: themeProvider.isDarkMode 
+                                ? Color(0xFF1A1A1A) 
+                                : Colors.grey[100],
+                            borderRadius: BorderRadius.circular(25),
+                            border: Border.all(
+                              color: themeProvider.isDarkMode 
+                                  ? Colors.white24 
+                                  : Colors.transparent,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _messageController,
+                            style: TextStyle(
+                              color: themeProvider.isDarkMode 
+                                  ? Colors.white 
+                                  : Colors.black87,
+                              fontSize: 16,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Escribe tu mensaje...',
+                              hintStyle: TextStyle(
+                                color: themeProvider.isDarkMode 
+                                    ? Colors.white54 
+                                    : Colors.grey[500],
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20, 
+                                vertical: 12,
+                              ),
+                            ),
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLines: null,
+                            onSubmitted: (_) => _sendMessage(),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xFF4CAF50).withOpacity(0.4),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(25),
+                            onTap: _sendMessage,
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              child: Icon(
+                                Icons.send,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 }
 
