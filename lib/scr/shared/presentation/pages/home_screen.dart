@@ -8,6 +8,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/profile/
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/profile/presentation/pages/patient_profile_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/notice_manager.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/data/theme_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String? role;
   int? doctorId;
+  bool _isDarkMode = false;
 
   List<Widget> _widgetOptions = [];
 
@@ -27,7 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadRoleAndDoctorId();
-    _loadNotice(); // <-- Agrega esta línea
+    _loadNotice();
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    final isDark = await ThemeService.isDarkMode();
+    setState(() {
+      _isDarkMode = isDark;
+    });
   }
 
   Future<void> _loadRoleAndDoctorId() async {
@@ -59,11 +69,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-
   void _showNoticeDetail(Map<String, dynamic> notice) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
+        backgroundColor: _isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -72,13 +82,20 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 notice['title'] ?? '',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF8F7193)),
+                style: TextStyle(
+                  fontSize: 20, 
+                  fontWeight: FontWeight.bold, 
+                  color: _isDarkMode ? Colors.white : Color(0xFF8F7193)
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 notice['body'] ?? '',
-                style: const TextStyle(fontSize: 16, color: Color(0xFF4B006E)),
+                style: TextStyle(
+                  fontSize: 16, 
+                  color: _isDarkMode ? Colors.white70 : Color(0xFF4B006E)
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -105,11 +122,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final notice = NoticeManager.currentNotice;
     return Scaffold(
+      backgroundColor: _isDarkMode ? Color(0xFF1E1E1E) : Color(0xFFF5F5F5),
       body: Column(
         children: [
           if (notice != null)
             Container(
-              color: const Color(0xFFFFF3CD),
+              color: _isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFFFF3CD),
               padding: const EdgeInsets.all(10),
               child: Row(
                 children: [
@@ -118,8 +136,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () => _showNoticeDetail(notice),
                       child: Text(
                         notice['title'] ?? '',
-                        style: const TextStyle(
-                          color: Colors.black,
+                        style: TextStyle(
+                          color: _isDarkMode ? Colors.white : Colors.black,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                           decoration: TextDecoration.underline,
@@ -128,7 +146,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.black),
+                    icon: Icon(
+                      Icons.close, 
+                      color: _isDarkMode ? Colors.white : Colors.black
+                    ),
                     onPressed: () {
                       setState(() {
                         NoticeManager.clearNotice();
@@ -141,11 +162,17 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: _widgetOptions.isNotEmpty
                 ? _widgetOptions[_selectedIndex]
-                : const Center(child: CircularProgressIndicator()),
+                : Center(
+                    child: CircularProgressIndicator(
+                      color: _isDarkMode ? Colors.white : Color(0xFF8F7193),
+                    )
+                  ),
           ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: _isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -170,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: const Color(0xFFA788AB),
-        unselectedItemColor: const Color(0xFF8F7193),
+        unselectedItemColor: _isDarkMode ? Colors.white70 : Color(0xFF8F7193),
         onTap: _onItemTapped,
       ),
     );

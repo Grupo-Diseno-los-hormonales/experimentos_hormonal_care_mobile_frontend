@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/domain/services/patient_signup_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/puzzle_captcha_dialog.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
 import 'package:flutter/gestures.dart';
 
 class SignUpPatient extends StatefulWidget {
@@ -21,38 +23,38 @@ class _SignUpPatientState extends State<SignUpPatient> {
   final TextEditingController _typeOfBloodController = TextEditingController();
   final TextEditingController _doctorIdController = TextEditingController();
   String _image = '';
-  String? _gender; // No se inicializa con un valor predeterminado
+  String? _gender;
   bool _captchaVerified = false;
   bool _termsAccepted = false;
 
-
-   void _showTermsDialog() async {
+  void _showTermsDialog() async {
     final accepted = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          constraints: const BoxConstraints(maxHeight: 500, maxWidth: 400),
-          child: Column(
-            children: [
-              const Text(
-                'Términos y Condiciones',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                  color: Color(0xFF8F7193),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              const Expanded(
-                child: SingleChildScrollView(
-                  child: Text(
-                    '''
-HormonalCare 2025 5.2.4 Acuerdo de Servicio - SaaS
+      builder: (context) => Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return Dialog(
+            backgroundColor: Theme.of(context).dialogBackgroundColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              constraints: const BoxConstraints(maxHeight: 500, maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Términos y Condiciones',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        '''HormonalCare 2025 5.2.4 Acuerdo de Servicio - SaaS
 
 El presente Acuerdo de Servicio (el "Acuerdo") establece los términos y condiciones bajo los cuales los usuarios podrán acceder y utilizar la plataforma HormonalCare como parte del servicio SaaS (Software as a Service) proporcionado por Los Hormonales. Este Acuerdo es aplicable a todos los usuarios que utilicen el servicio, ya sea de manera gratuita o mediante suscripción.
 
@@ -94,44 +96,41 @@ El uso de la plataforma HormonalCare debe cumplir con todas las leyes y regulaci
 En caso de controversias derivadas del uso de la plataforma HormonalCare, ambas partes acuerdan resolver los conflictos mediante un proceso de mediación antes de recurrir a procedimientos legales.
 
 11. Vigencia
-Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por primera vez a la plataforma HormonalCare y continuará en vigor hasta que sea terminado por cualquiera de las partes, conforme a las disposiciones del Acuerdo.
-                    ''',
-                    style: TextStyle(fontSize: 12, color: Colors.black87),
-                    textAlign: TextAlign.justify,
+Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por primera vez a la plataforma HormonalCare y continuará en vigor hasta que sea terminado por cualquiera de las partes, conforme a las disposiciones del Acuerdo.''',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: themeProvider.isDarkMode 
+                              ? Colors.white70
+                              : Colors.grey[700],
+                        ),
+                        textAlign: TextAlign.justify,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Aceptar'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(
+                      'Rechazar',
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8F7193),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  'Aceptar términos',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text(
-                  'Cancelar',
-                  style: TextStyle(
-                    color: Color(0xFF8F7193),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
     if (accepted == true) {
@@ -141,11 +140,10 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
     }
   }
   
- Future<void> _verifyCaptcha() async {
+  Future<void> _verifyCaptcha() async {
     final result = await showDialog<bool>(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => const PuzzleCaptchaDialog(),
+      builder: (context) => PuzzleCaptchaDialog(),
     );
     if (result == true) {
       setState(() {
@@ -153,405 +151,638 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: Colors.green[600],
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-          duration: const Duration(seconds: 2),
-          content: Row(
-            children: [
-              const Icon(Icons.verified, color: Colors.white, size: 28),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Text(
-                  '¡CAPTCHA verificado!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    letterSpacing: 1.1,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          content: Text('CAPTCHA verificado correctamente'),
+          backgroundColor: Colors.green,
         ),
       );
-    } else {
-      setState(() {
-        _captchaVerified = false;
-      });
     }
   }
 
- void _submit() async {
-    if (!_termsAccepted) {
+  void _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (!_captchaVerified) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Debes aceptar los Términos y Condiciones')),
+        SnackBar(content: Text('Por favor, verifica el CAPTCHA')),
       );
       return;
     }
-    if (_formKey.currentState!.validate() && _captchaVerified) {
-      try {
-        final doctorId = int.parse(_doctorIdController.text);
-        if (doctorId < 1 || doctorId > 100) {
-          throw Exception('Doctor ID must be between 1 and 100');
-        }
-
-        final imageUrl = _image.isNotEmpty
-            ? _image
-            : 'https://cdn.pixabay.com/photo/2018/11/08/23/52/man-3803551_1280.jpg';
-
-        await PatientSignUpService.signUpPatient(
-          _usernameController.text.trim(),
-          _passwordController.text.trim(),
-          _firstNameController.text.trim(),
-          _lastNameController.text.trim(),
-          _gender!,
-          _phoneNumberController.text.trim(),
-          imageUrl,
-          _birthdayController.text.trim(),
-          _typeOfBloodController.text.trim(),
-          doctorId,
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Patient registered successfully!')),
-        );
-        Navigator.pop(context);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
-      }
-    } else if (!_captchaVerified) {
+    if (!_termsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please verify the CAPTCHA')),
+        SnackBar(content: Text('Debes aceptar los términos y condiciones')),
+      );
+      return;
+    }
+
+    try {
+      await PatientSignUpService.signUpPatient(
+        _usernameController.text.trim(),
+        _passwordController.text.trim(),
+        _firstNameController.text.trim(),
+        _lastNameController.text.trim(),
+        _gender ?? '',
+        _phoneNumberController.text.trim(),
+        _image,
+        _birthdayController.text.trim(),
+        _typeOfBloodController.text.trim(),
+        int.parse(_doctorIdController.text.trim()),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Registro exitoso'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error en el registro: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
-
-
- @override
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE5DDE6),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFC0A0C3),
-        title: const Text("Patient's Sign Up"),
-        centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Container(
-            padding: const EdgeInsets.all(20),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFC0A0C3),
-              borderRadius: BorderRadius.circular(15),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: themeProvider.isDarkMode 
+                    ? [
+                        Color(0xFF1E1E1E),
+                        Color(0xFF2D2D2D),
+                        Color(0xFF1E1E1E),
+                      ]
+                    : [
+                        Color(0xFFE5DDE6),
+                        Color(0xFFF3EAF7),
+                        Color(0xFFE2D1F4),
+                      ],
+              ),
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      // Implement image picker here
-                    },
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: _image.isNotEmpty ? NetworkImage(_image) : null,
-                      child: _image.isEmpty ? const Icon(Icons.camera_alt, size: 50) : null,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildTextField(
-                    _usernameController,
-                    'Enter your username',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your username';
-                      }
-                      return null;
-                    },
-                  ),
-                  _buildTextField(
-                    _passwordController,
-                    'Enter your password',
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters long';
-                      }
-                      return null;
-                    },
-                  ),
-                  _buildTextField(
-                    _firstNameController,
-                    'Enter your first name',
-                    validator: (value) => _validateOnlyLetters(value, 'First Name'),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))],
-                  ),
-                  _buildTextField(
-                    _lastNameController,
-                    'Enter your last name',
-                    validator: (value) => _validateOnlyLetters(value, 'Last Name'),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]'))],
-                  ),
-                  DropdownButtonFormField<String>(
-                    value: _gender,
-                    decoration: InputDecoration(
-                      labelText: 'Select your gender',
-                      filled: true,
-                      fillColor: const Color(0xFFE5DDE6),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    items: ['Male', 'Female']
-                        .map((gender) => DropdownMenuItem(
-                              value: gender,
-                              child: Text(gender),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _gender = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select your gender';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  _buildTextField(
-                    _phoneNumberController,
-                    'Enter your phone number (XXX-XXX-XXXX)',
-                    validator: _validatePhoneNumber,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildTextField(
-                    _birthdayController,
-                    'Enter your birthday (YYYY-MM-DD)',
-                    validator: _validateDate,
-                  ),
-                  const SizedBox(height: 10),
-
-                DropdownButtonFormField<String>(
-                  value: _typeOfBloodController.text.isNotEmpty ? _typeOfBloodController.text : null,
-                  decoration: InputDecoration(
-                    labelText: 'Select your blood type',
-                    filled: true,
-                    fillColor: const Color(0xFFE5DDE6),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  items: [
-                    'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
-                  ].map((type) => DropdownMenuItem(
-                        value: type,
-                        child: Text(type),
-                      )).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _typeOfBloodController.text = value ?? '';
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select your blood type';
-                    }
-                    return null;
-                  },
-                ),
-                  const SizedBox(height: 10),
-                  _buildTextField(
-                    _doctorIdController,
-                    'Enter your doctor ID',
-                    keyboardType: TextInputType.number,
-                    validator: _validateDoctorId,
-                  ),
-                  const SizedBox(height: 20),
-                     // Checkbox de términos y condiciones
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _termsAccepted,
-                        activeColor: const Color(0xFF8F7193),
-                        onChanged: (value) {
-                          if (!_termsAccepted) {
-                            _showTermsDialog();
-                          }
-                        },
-                      ),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Acepto los ',
-                            style: const TextStyle(color: Colors.black, fontSize: 15),
-                            children: [
-                              TextSpan(
-                                text: 'Términos y Condiciones',
-                                style: const TextStyle(
-                                  color: Color(0xFF8F7193),
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = _showTermsDialog,
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    // Header con logo y título
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 30),
+                      child: Column(
+                        children: [
+                          // Logo
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFFA788AB),
+                                  Color(0xFF8F7193),
+                                ],
                               ),
-                            ],
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0xFF8F7193).withOpacity(0.4),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.person_add,
+                                size: 50,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Patient Registration',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).textTheme.bodyMedium?.color,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Create your account to access medical services',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: themeProvider.isDarkMode 
+                                  ? Colors.white70 
+                                  : Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Formulario en Card
+                    Container(
+                      decoration: BoxDecoration(
+                        color: themeProvider.isDarkMode 
+                            ? Color(0xFF2D2D2D).withOpacity(0.9)
+                            : Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(28),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // First Name
+                            _buildTextField(
+                              controller: _firstNameController,
+                              label: 'First Name',
+                              hint: 'Enter your first name',
+                              icon: Icons.person_outline,
+                              validator: (value) => value?.isEmpty ?? true ? 'Please enter first name' : null,
+                              themeProvider: themeProvider,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Last Name
+                            _buildTextField(
+                              controller: _lastNameController,
+                              label: 'Last Name',
+                              hint: 'Enter your last name',
+                              icon: Icons.person_outline,
+                              validator: (value) => value?.isEmpty ?? true ? 'Please enter last name' : null,
+                              themeProvider: themeProvider,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Username (en lugar de email)
+                            _buildTextField(
+                              controller: _usernameController,
+                              label: 'Username',
+                              hint: 'Enter your username',
+                              icon: Icons.account_circle_outlined,
+                              validator: (value) {
+                                if (value?.isEmpty ?? true) return 'Please enter username';
+                                if (value!.length < 3) return 'Username must be at least 3 characters';
+                                if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
+                                  return 'Username can only contain letters, numbers and underscore';
+                                }
+                                return null;
+                              },
+                              themeProvider: themeProvider,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Password
+                            _buildTextField(
+                              controller: _passwordController,
+                              label: 'Password',
+                              hint: 'Enter your password',
+                              icon: Icons.lock_outline,
+                              obscureText: true,
+                              validator: (value) {
+                                if (value?.isEmpty ?? true) return 'Please enter password';
+                                if (value!.length < 6) return 'Password must be at least 6 characters';
+                                return null;
+                              },
+                              themeProvider: themeProvider,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Phone Number
+                            _buildTextField(
+                              controller: _phoneNumberController,
+                              label: 'Phone Number',
+                              hint: 'Enter your phone number',
+                              icon: Icons.phone_outlined,
+                              keyboardType: TextInputType.phone,
+                              validator: (value) => value?.isEmpty ?? true ? 'Please enter phone number' : null,
+                              themeProvider: themeProvider,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Gender
+                            _buildGenderDropdown(themeProvider),
+                            const SizedBox(height: 20),
+
+                            // Birthday
+                            _buildBirthdayField(themeProvider),
+                            const SizedBox(height: 20),
+
+                            // Blood Type
+                            _buildTextField(
+                              controller: _typeOfBloodController,
+                              label: 'Blood Type',
+                              hint: 'e.g., O+, A-, B+',
+                              icon: Icons.bloodtype_outlined,
+                              validator: (value) => value?.isEmpty ?? true ? 'Please enter blood type' : null,
+                              themeProvider: themeProvider,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Doctor ID
+                            _buildTextField(
+                              controller: _doctorIdController,
+                              label: 'Doctor ID',
+                              hint: 'Enter doctor ID (1-10)',
+                              icon: Icons.medical_services_outlined,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              validator: (value) {
+                                if (value?.isEmpty ?? true) return 'Please enter doctor ID';
+                                final id = int.tryParse(value!);
+                                if (id == null || id < 1 || id > 10) {
+                                  return 'Doctor ID must be between 1 and 10';
+                                }
+                                return null;
+                              },
+                              themeProvider: themeProvider,
+                            ),
+                            const SizedBox(height: 30),
+
+                            // CAPTCHA Section
+                            _buildCaptchaSection(themeProvider),
+                            const SizedBox(height: 20),
+
+                            // Terms and Conditions
+                            _buildTermsSection(themeProvider),
+                            const SizedBox(height: 30),
+
+                            // Register Button
+                            Container(
+                              height: 56,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Color(0xFF8F7193), Color(0xFFA788AB)],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0xFF8F7193).withOpacity(0.4),
+                                    blurRadius: 15,
+                                    offset: Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: _submit,
+                                  child: Center(
+                                    child: Text(
+                                      'Register Patient',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Back to Login
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                'Already have an account? Sign In',
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _verifyCaptcha,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8F7193),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text(
-                      'Verify CAPTCHA',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    required String? Function(String?) validator,
+    required ThemeProvider themeProvider,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          obscureText: obscureText,
+          inputFormatters: inputFormatters,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 16,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(
+              icon,
+              color: Color(0xFF8F7193),
+            ),
+            hintStyle: TextStyle(
+              color: themeProvider.isDarkMode 
+                  ? Colors.white54 
+                  : Colors.black54,
+            ),
+            filled: true,
+            fillColor: themeProvider.isDarkMode 
+                ? Color(0xFF4A4A4A) 
+                : Color(0xFFF8F4F9),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: Color(0xFF8F7193),
+                width: 2,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
+            ),
+          ),
+          validator: validator,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGenderDropdown(ThemeProvider themeProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Gender',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: themeProvider.isDarkMode 
+                ? Color(0xFF4A4A4A) 
+                : Color(0xFFF8F4F9),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: DropdownButtonFormField<String>(
+            value: _gender,
+            decoration: InputDecoration(
+              hintText: 'Select your gender',
+              prefixIcon: Icon(
+                Icons.person_outline,
+                color: Color(0xFF8F7193),
+              ),
+              hintStyle: TextStyle(
+                color: themeProvider.isDarkMode 
+                    ? Colors.white54 
+                    : Colors.black54,
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            ),
+            dropdownColor: themeProvider.isDarkMode 
+                ? Color(0xFF4A4A4A) 
+                : Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+            items: ['Male', 'Female', 'Other'].map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (value) => setState(() => _gender = value),
+            validator: (value) => value == null ? 'Please select gender' : null,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBirthdayField(ThemeProvider themeProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Birthday',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () async {
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: Theme.of(context).colorScheme.copyWith(
+                      primary: Theme.of(context).primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8F7193),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                  child: child!,
+                );
+              },
+            );
+            if (picked != null) {
+              setState(() {
+                _birthdayController.text = "${picked.toLocal()}".split(' ')[0];
+              });
+            }
+          },
+          child: AbsorbPointer(
+            child: TextFormField(
+              controller: _birthdayController,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                fontSize: 16,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Select your birthday',
+                prefixIcon: Icon(
+                  Icons.calendar_today,
+                  color: Color(0xFF8F7193),
+                ),
+                hintStyle: TextStyle(
+                  color: themeProvider.isDarkMode 
+                      ? Colors.white54 
+                      : Colors.black54,
+                ),
+                filled: true,
+                fillColor: themeProvider.isDarkMode 
+                    ? Color(0xFF4A4A4A) 
+                    : Color(0xFFF8F4F9),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: Color(0xFF8F7193),
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+              ),
+              validator: (value) => value?.isEmpty ?? true ? 'Please select birthday' : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCaptchaSection(ThemeProvider themeProvider) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _captchaVerified ? Colors.green : Theme.of(context).primaryColor,
+          width: 2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _captchaVerified ? Icons.check_circle : Icons.security,
+            color: _captchaVerified ? Colors.green : Theme.of(context).primaryColor,
+            size: 28,
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _captchaVerified ? 'CAPTCHA Verified' : 'Verify you are human',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+          ),
+          if (!_captchaVerified)
+            ElevatedButton(
+              onPressed: _verifyCaptcha,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text('Verify'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTermsSection(ThemeProvider themeProvider) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _termsAccepted ? Colors.green : Theme.of(context).primaryColor,
+          width: 2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Checkbox(
+            value: _termsAccepted,
+            onChanged: (value) => setState(() => _termsAccepted = value ?? false),
+            activeColor: Theme.of(context).primaryColor,
+          ),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+                children: [
+                  TextSpan(text: 'I accept the '),
+                  TextSpan(
+                    text: 'Terms and Conditions',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      decoration: TextDecoration.underline,
                     ),
-                    child: const Text(
-                      'Sign Up',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                    recognizer: TapGestureRecognizer()..onTap = _showTermsDialog,
                   ),
                 ],
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
-  }
-
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label, {
-    bool obscureText = false,
-    String? Function(String?)? validator,
-    TextInputType keyboardType = TextInputType.text,
-    List<TextInputFormatter>? inputFormatters,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: const Color(0xFFE5DDE6),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
-          ),
-        ),
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        validator: validator,
-        inputFormatters: inputFormatters,
-      ),
-    );
-  }
-
-  String? _validateDate(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your birthday';
-    }
-    final dateRegex = RegExp(r'^\d{4}-\d{2}-\d{2}$');
-    if (!dateRegex.hasMatch(value)) {
-      return 'Invalid date format. Use YYYY-MM-DD';
-    }
-    try {
-      DateTime.parse(value);
-    } catch (_) {
-      return 'Invalid date';
-    }
-    return null;
-  }
-
-  String? _validatePhoneNumber(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your phone number';
-    }
-    final phoneRegex = RegExp(r'^\d{3}-\d{3}-\d{4}$');
-    if (!phoneRegex.hasMatch(value)) {
-      return 'Invalid phone number format. Use XXX-XXX-XXXX';
-    }
-    return null;
-  }
-
-  String? _validateDoctorId(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your doctor ID';
-    }
-    final doctorId = int.tryParse(value);
-    if (doctorId == null || doctorId < 1 || doctorId > 100) {
-      return 'Doctor ID must be a number between 1 and 100';
-    }
-    return null;
-  }
-
-  String? _validateOnlyLetters(String? value, String fieldName) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your $fieldName';
-    }
-    final lettersRegex = RegExp(r'^[a-zA-Z\s]+$');
-    if (!lettersRegex.hasMatch(value)) {
-      return '$fieldName must contain only letters';
-    }
-    return null;
   }
 }

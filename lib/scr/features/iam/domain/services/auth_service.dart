@@ -128,6 +128,7 @@ class AuthService {
   }
 
   Future<void> logout() async {
+    // NO limpiar el tema - se mantiene global
     await JwtStorage.clearAll();
   }
 

@@ -1,13 +1,14 @@
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/admin/presentation/pages/support_chat_screen.dart';
-import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/presentation/pages/appointment_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/presentation/pages/appointment_screen_patient.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/presentation/pages/doctors_list_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/treatment_tracker/domain/models/log_entry_model.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/pages/home_screen_patient.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/custom_bottom_navigation_bar.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class TreatmentTrackerScreen extends StatefulWidget {
   const TreatmentTrackerScreen({Key? key}) : super(key: key);
@@ -17,7 +18,6 @@ class TreatmentTrackerScreen extends StatefulWidget {
 }
 
 class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
-
   int? patientId;
 
   final TextEditingController _glucoseController = TextEditingController();
@@ -227,331 +227,386 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
     super.dispose();
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-              // Logo
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2D1F4),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Center(
-                  child: Text(
-                    "HC",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Logo
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFE2D1F4),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "HC",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: themeProvider.isDarkMode ? Colors.white : Colors.deepPurple,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "HormonalCare",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.deepPurple,
-                ),
-              ),
-              const SizedBox(height: 40),
-              
-              // Contador de racha
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      "$_streakCount",
-                      style: const TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "HormonalCare",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: themeProvider.isDarkMode ? Colors.white70 : Colors.deepPurple,
                     ),
-                    const Text(
-                      "days streak",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Visualización semanal
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Días de la semana
-                    // ignore: prefer_const_constructors
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: const [
-                        Text("S", style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text("M", style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text("T", style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text("W", style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text("T", style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text("F", style: TextStyle(fontWeight: FontWeight.w500)),
-                        Text("S", style: TextStyle(fontWeight: FontWeight.w500)),
+                  ),
+                  const SizedBox(height: 40),
+                  
+                  // Contador de racha
+                  Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          "$_streakCount",
+                          style: TextStyle(
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                        Text(
+                          "days streak",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: themeProvider.isDarkMode ? Colors.white70 : Colors.black87,
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    
-                    // Círculos de progreso
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(7, (index) {
-                        return Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _weeklyProgress[index]
-                                ? const Color(0xFFBFA2C7)
-                                : Colors.grey.shade200,
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Keep going like this!",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Sección de hoy
-              const Text(
-                "Today",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              // Campo de glucosa
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFBFA2C7),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Row(
-                  children: [
-                    const Text(
-                      "Blood glucose",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const Spacer(),
-                    SizedBox(
-                      width: 80,
-                      child: TextField(
-                        controller: _glucoseController,
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.right,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "0",
-                          suffixText: "mg/dL",
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              
-              // Campo de insulina
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFBFA2C7),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Row(
-                  children: [
-                    const Text(
-                      "Insulin",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const Spacer(),
-                    SizedBox(
-                      width: 80,
-                      child: TextField(
-                        controller: _insulinController,
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.right,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "0",
-                          suffixText: "units",
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              // Botón de guardar
-              Center(
-                child: SizedBox(
-                  width: 150,
-                  child: ElevatedButton(
-                    onPressed: _saveLog,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF9C7FA3),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text("Save"),
                   ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-               // Historial de registros
-            const Text(
-              "LOG HISTORY",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Column(
-              children: _logHistory.isEmpty
-                  ? [
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text("No logs yet"),
+                  const SizedBox(height: 24),
+                  
+                  // Visualización semanal
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade200,
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        // Días de la semana
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildDayLabel("S"),
+                            _buildDayLabel("M"),
+                            _buildDayLabel("T"),
+                            _buildDayLabel("W"),
+                            _buildDayLabel("T"),
+                            _buildDayLabel("F"),
+                            _buildDayLabel("S"),
+                          ],
                         ),
-                      )
-                    ]
-                  : _logHistory.take(3).map((entry) {
-                      return Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Row(
-                              children: [
-                                Text(
-                                  _formatLogDate(entry.date),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  "${entry.glucose.toStringAsFixed(0)} mg/dL",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                        const SizedBox(height: 8),
+                        
+                        // Círculos de progreso
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: List.generate(7, (index) {
+                            return Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _weeklyProgress[index]
+                                    ? Theme.of(context).primaryColor
+                                    : (themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade200),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 16),
+                        Divider(color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade300),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Keep going like this!",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: themeProvider.isDarkMode ? Colors.white70 : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Sección de hoy
+                  Text(
+                    "Today",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Campo de glucosa
+                  Container(
+                    decoration: BoxDecoration(
+                      color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFBFA2C7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Blood glucose",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                        const Spacer(),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: _glucoseController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyMedium?.color,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "0",
+                              hintStyle: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white54 : Colors.black54,
+                              ),
+                              suffixText: "mg/dL",
+                              suffixStyle: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white70 : Colors.black87,
+                              ),
                             ),
                           ),
-                          const Divider(height: 1),
-                        ],
-                      );
-                    }).toList(),
-            ),
-
-            // --- Botón de soporte al final de la sección de perfil ---
-            const SizedBox(height: 32),
-            Center(
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8F7193),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                icon: const Icon(Icons.support_agent, color: Colors.white),
-                label: const Text(
-                  'Soporte HormonalCare',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const SupportChatScreen()),
-                  );
-                },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // Campo de insulina
+                  Container(
+                    decoration: BoxDecoration(
+                      color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFBFA2C7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Insulin",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                        const Spacer(),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: _insulinController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyMedium?.color,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "0",
+                              hintStyle: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white54 : Colors.black54,
+                              ),
+                              suffixText: "units",
+                              suffixStyle: TextStyle(
+                                color: themeProvider.isDarkMode ? Colors.white70 : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Botón de guardar
+                  Center(
+                    child: SizedBox(
+                      width: 150,
+                      child: ElevatedButton(
+                        onPressed: _saveLog,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text(
+                          "Save",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Historial de registros
+                  Text(
+                    "LOG HISTORY",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Column(
+                    children: _logHistory.isEmpty
+                        ? [
+                            Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text(
+                                  "No logs yet",
+                                  style: TextStyle(
+                                    color: themeProvider.isDarkMode ? Colors.white70 : Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ]
+                        : _logHistory.take(3).map((entry) {
+                            return Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        _formatLogDate(entry.date),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        "${entry.glucose.toStringAsFixed(0)} mg/dL",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Divider(
+                                  height: 1,
+                                  color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade300,
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                  ),
+                  
+                  // ✅ MANTENER SOLO EL BOTÓN DE SOPORTE
+                  const SizedBox(height: 32),
+                  Center(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Color(0xFF8F7193),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      icon: const Icon(Icons.support_agent, color: Colors.white),
+                      label: const Text(
+                        'Soporte HormonalCare',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const SupportChatScreen()),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    ),
-    bottomNavigationBar: CustomBottomNavigationBar(
-      currentIndex: 0,
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreenPatient()),
-            );
-            break;
-          case 1:
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => DoctorListScreen()),
-            );
-            break;
-          case 2:
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AppointmentScreenPatient()),
-            );
-            break;
-          case 3:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const TreatmentTrackerScreen()),
-            );
-            break;
-        }
+          ),
+          bottomNavigationBar: CustomBottomNavigationBar(
+            currentIndex: 0,
+            onTap: (index) {
+              switch (index) {
+                case 0:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreenPatient()),
+                  );
+                  break;
+                case 1:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DoctorListScreen()),
+                  );
+                  break;
+                case 2:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AppointmentScreenPatient()),
+                  );
+                  break;
+                case 3:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const TreatmentTrackerScreen()),
+                  );
+                  break;
+              }
+            },
+          ),
+        );
       },
-    ),
-  );
-}
+    );
+  }
+  
+  Widget _buildDayLabel(String day) {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Text(
+          day,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: themeProvider.isDarkMode ? Colors.white70 : Colors.black87,
+          ),
+        );
+      },
+    );
+  }
   
   // Formatear fecha para el historial
   String _formatLogDate(DateTime date) {

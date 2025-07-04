@@ -6,6 +6,8 @@ import 'send_notice.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/domain/services/auth_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/presentation/pages/sign_in.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class AdminToolsScreen extends StatefulWidget {
   @override
@@ -18,25 +20,26 @@ class _AdminToolsScreenState extends State<AdminToolsScreen> with TickerProvider
   late AnimationController _animationController;
   final AuthService _authService = AuthService();
 
-Future<void> _logout() async {
-  await _authService.logout();
-  if (!mounted) return;
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(builder: (context) => SignIn()),
-    (route) => false,
-  );
-}
+  @override
+  void initState() {
+    _tabController = TabController(length: 5, vsync: this);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
+    super.initState();
+  }
 
- @override
-void initState() {
-  _tabController = TabController(length: 5, vsync: this); // Cambia a 5
-  _animationController = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 6),
-  )..repeat();
-  super.initState();
-}
+  Future<void> _logout() async {
+    // NO limpiar el tema - se mantiene global
+    await _authService.logout();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => SignIn()),
+      (route) => false,
+    );
+  }
 
   @override
   void dispose() {
@@ -47,116 +50,135 @@ void initState() {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        // Fondo animado morado clarito
-        return Scaffold(
-          backgroundColor: const Color(0xFFF3EAF7),
-          appBar: AppBar(
-            backgroundColor: const Color(0xFFF3EAF7),
-            elevation: 0,
-            titleSpacing: 0,
-            title: Row(
-              children: [
-                const SizedBox(width: 16),
-                const Text(
-                  'Admin Panel',
-                  style: TextStyle(
-                    color: Color(0xFF4B006E),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                  ),
-                ),
-                const Spacer(),
-                ElevatedButton.icon(
-                  onPressed: _logout,
-                  icon: const Icon(Icons.logout, color: Colors.white, size: 20),
-                  label: const Text('Cerrar sesión', style: TextStyle(color: Colors.white)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8F7193),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  ),
-                ),
-                const SizedBox(width: 16),
-              ],
-            ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(56),
-              child: Container(
-                color: const Color(0xFFF3EAF7),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    color: const Color(0xFFE5DDE6),
-                  ),
-                  labelColor: const Color(0xFF8F7193),
-                  unselectedLabelColor: const Color(0xFF4B006E),
-                  tabs: const [
-                    Tab(text: 'Dashboard'),
-                    Tab(text: 'Stats'),
-                    Tab(text: 'Avisos'),
-                    Tab(text: 'Chat'),
-                    Tab(text: 'Logs'),
-
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return Scaffold(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                elevation: 0,
+                titleSpacing: 0,
+                title: Row(
+                  children: [
+                    const SizedBox(width: 16),
+                    Text(
+                      'Admin Panel',
+                      style: TextStyle(
+                        color: Theme.of(context).appBarTheme.foregroundColor,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Solo botón de logout - SIN botón de modo oscuro
+                    IconButton(
+                      icon: Icon(
+                        Icons.logout,
+                        color: Theme.of(context).appBarTheme.foregroundColor,
+                      ),
+                      onPressed: _logout,
+                    ),
+                    const SizedBox(width: 16),
                   ],
                 ),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(50),
+                  child: Container(
+                    color: Theme.of(context).appBarTheme.backgroundColor,
+                    child: TabBar(
+                      controller: _tabController,
+                      indicatorColor: Colors.white,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white70,
+                      isScrollable: true,
+                      tabs: const [
+                        Tab(text: 'Dashboard'),
+                        Tab(text: 'Stats'),
+                        Tab(text: 'Logs'),
+                        Tab(text: 'Notices'),
+                        Tab(text: 'Support'),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-          body: Stack(
-            children: [
-              // Fondo animado con gradiente morado claro
-              Positioned.fill(
-                child: AnimatedGradientBackground(animation: _animationController),
+              body: Stack(
+                children: [
+                  AnimatedGradientBackground(
+                    animation: _animationController,
+                    isDarkMode: themeProvider.isDarkMode,
+                  ),
+                  TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _DashboardSection(
+                        animation: _animationController,
+                        isDarkMode: themeProvider.isDarkMode,
+                      ),
+                      _StatsSection(
+                        animation: _animationController,
+                        isDarkMode: themeProvider.isDarkMode,
+                      ),
+                      _LogsSection(
+                        animation: _animationController,
+                        isDarkMode: themeProvider.isDarkMode,
+                      ),
+                      SendNoticeScreen(),
+                      const AdminGlobalChatSection(),
+                    ],
+                  ),
+                ],
               ),
-                      TabBarView(
-            controller: _tabController,
-            children: [
-              _DashboardSection(animation: _animationController),
-              _StatsSection(animation: _animationController),
-              SendNoticeScreen(),
-              AdminGlobalChatSection(), // <-- Aquí agregas el chat
-              _LogsSection(animation: _animationController),
-            ],
-          ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 }
 
-// Fondo animado con gradiente morado claro
+// Actualiza el fondo animado
 class AnimatedGradientBackground extends StatelessWidget {
   final Animation<double> animation;
-  const AnimatedGradientBackground({required this.animation});
+  final bool isDarkMode;
+  
+  const AnimatedGradientBackground({
+    required this.animation,
+    required this.isDarkMode,
+  });
+  
   @override
   Widget build(BuildContext context) {
     final t = animation.value;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment(-1 + 2 * t, -1 + 2 * t),
-          end: Alignment(1 - 2 * t, 1 - 2 * t),
-          colors: [
-            Color.lerp(const Color(0xFFF3EAF7), const Color(0xFFE5DDE6), sin(t * pi) * 0.5 + 0.5)!,
-            Color.lerp(const Color(0xFFE5DDE6), const Color(0xFFF3EAF7), cos(t * pi) * 0.5 + 0.5)!,
-          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDarkMode
+              ? [
+                  Color(0xFF1E1E1E),
+                  Color(0xFF2D2D2D),
+                  Color(0xFF4A4A4A),
+                ]
+              : [
+                  Color(0xFFF3EAF7).withOpacity(0.8 + 0.2 * sin(t * 2 * pi)),
+                  Color(0xFFE2D1F4).withOpacity(0.6 + 0.3 * cos(t * 3 * pi)),
+                  Color(0xFFD1C2E8).withOpacity(0.7 + 0.2 * sin(t * 4 * pi)),
+                ],
         ),
       ),
     );
   }
 }
 
-// DASHBOARD
+// Actualiza las secciones existentes para modo oscuro
 class _DashboardSection extends StatelessWidget {
   final Animation<double> animation;
-  _DashboardSection({required this.animation});
+  final bool isDarkMode;
+  
+  _DashboardSection({required this.animation, required this.isDarkMode});
 
   final stats = const [
     {'label': 'Avisos enviados', 'value': '15,000'},
@@ -196,33 +218,155 @@ class _DashboardSection extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: stats.map((stat) => _StatCard(label: stat['label']!, value: stat['value']!, animation: animation)).toList(),
+          Text(
+            '📊 Estadísticas Rápidas',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Color(0xFF4B006E),
+            ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: stats.map((stat) => _StatCard(
+              label: stat['label']!,
+              value: stat['value']!,
+              animation: animation,
+              isDarkMode: isDarkMode,
+            )).toList(),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            '📋 Actividad Reciente',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Color(0xFF4B006E),
+            ),
+          ),
+          const SizedBox(height: 12),
           _CurvedCard(
             animation: animation,
+            isDarkMode: isDarkMode,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Actividad Reciente', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF8F7193))),
-                ...recent.map((e) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text(e, style: const TextStyle(color: Color(0xFF4B006E))),
-                )),
-                const Divider(height: 24),
-                const Text('Errores críticos', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                ...errors.map((e) => Text(e, style: const TextStyle(color: Colors.red))),
-                const Divider(height: 24),
-                const Text('IPs sospechosas', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
-                ...ips.map((e) => Text(e, style: const TextStyle(color: Colors.orange))),
-                const Divider(height: 24),
-                const Text('Alertas de comportamiento', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.deepPurple)),
-                ...alerts.map((e) => Text(e, style: const TextStyle(color: Colors.deepPurple))),
-              ],
+              children: recent.map((item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.circle, size: 8, color: isDarkMode ? Colors.white70 : Color(0xFF8F7193)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        item,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDarkMode ? Colors.white70 : Color(0xFF4B006E),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )).toList(),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '🔴 Errores',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Color(0xFF4B006E),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _CurvedCard(
+                      animation: animation,
+                      isDarkMode: isDarkMode,
+                      child: Column(
+                        children: errors.map((error) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            error,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDarkMode ? Colors.red[300] : Colors.red[700],
+                            ),
+                          ),
+                        )).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '⚠️ IPs Sospechosas',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Color(0xFF4B006E),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _CurvedCard(
+                      animation: animation,
+                      isDarkMode: isDarkMode,
+                      child: Column(
+                        children: ips.map((ip) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            ip,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDarkMode ? Colors.orange[300] : Colors.orange[700],
+                            ),
+                          ),
+                        )).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            '🕵️ Alertas de Seguridad',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Color(0xFF4B006E),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _CurvedCard(
+            animation: animation,
+            isDarkMode: isDarkMode,
+            child: Column(
+              children: alerts.map((alert) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  alert,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDarkMode ? Colors.yellow[300] : Colors.orange[800],
+                  ),
+                ),
+              )).toList(),
             ),
           ),
         ],
@@ -235,23 +379,41 @@ class _StatCard extends StatelessWidget {
   final String label;
   final String value;
   final Animation<double> animation;
-  const _StatCard({required this.label, required this.value, required this.animation});
+  final bool isDarkMode;
+  
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.animation,
+    required this.isDarkMode,
+  });
+  
   @override
   Widget build(BuildContext context) {
     return _CurvedCard(
       animation: animation,
       width: 150,
+      isDarkMode: isDarkMode,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: double.tryParse(value.replaceAll(',', '')) ?? 0),
-            duration: const Duration(milliseconds: 900),
-            builder: (context, val, _) => Text(
-              val.toInt().toString(),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Color(0xFF7C3AED)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Color(0xFF4B006E),
             ),
           ),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF8F7193))),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11,
+              color: isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+            ),
+          ),
         ],
       ),
     );
@@ -261,107 +423,93 @@ class _StatCard extends StatelessWidget {
 // STATS
 class _StatsSection extends StatelessWidget {
   final Animation<double> animation;
-  _StatsSection({required this.animation});
+  final bool isDarkMode;
+  
+  _StatsSection({required this.animation, required this.isDarkMode});
+  
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _CurvedCard(
-          animation: animation,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Consultas vs Seguimientos (Mensual)', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF8F7193))),
-              SizedBox(
-                height: 200,
-                child: BarChart(
-                  BarChartData(
-                    borderData: FlBorderData(show: false),
-                    gridData: FlGridData(show: false),
-                    titlesData: FlTitlesData(show: true, bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (v,_) {
-                      const months = ['Ene','Feb','Mar','Abr','May'];
-                      return Text(months[v.toInt()%5], style: const TextStyle(color: Color(0xFF8F7193)));
-                    }))),
-                    barGroups: [
-                      BarChartGroupData(x: 0, barRods: [
-                        BarChartRodData(
-                          toY: 4,
-                          color: Color.lerp(const Color(0xFFa18cd1), const Color(0xFFfbc2eb), animation.value)!,
-                          borderRadius: BorderRadius.circular(8),
-                          width: 18,
-                        ),
-                        BarChartRodData(
-                          toY: 2.4,
-                          color: Color.lerp(const Color(0xFFfbc2eb), const Color(0xFFa18cd1), animation.value)!,
-                          borderRadius: BorderRadius.circular(8),
-                          width: 18,
-                        ),
-                      ]),
-                      BarChartGroupData(x: 1, barRods: [
-                        BarChartRodData(toY: 3, color: Color.lerp(const Color(0xFFa18cd1), const Color(0xFFfbc2eb), animation.value)!, borderRadius: BorderRadius.circular(8), width: 18),
-                        BarChartRodData(toY: 1.39, color: Color.lerp(const Color(0xFFfbc2eb), const Color(0xFFa18cd1), animation.value)!, borderRadius: BorderRadius.circular(8), width: 18),
-                      ]),
-                      BarChartGroupData(x: 2, barRods: [
-                        BarChartRodData(toY: 2, color: Color.lerp(const Color(0xFFa18cd1), const Color(0xFFfbc2eb), animation.value)!, borderRadius: BorderRadius.circular(8), width: 18),
-                        BarChartRodData(toY: 9.8, color: Color.lerp(const Color(0xFFfbc2eb), const Color(0xFFa18cd1), animation.value)!, borderRadius: BorderRadius.circular(8), width: 18),
-                      ]),
-                      BarChartGroupData(x: 3, barRods: [
-                        BarChartRodData(toY: 2.78, color: Color.lerp(const Color(0xFFa18cd1), const Color(0xFFfbc2eb), animation.value)!, borderRadius: BorderRadius.circular(8), width: 18),
-                        BarChartRodData(toY: 3.9, color: Color.lerp(const Color(0xFFfbc2eb), const Color(0xFFa18cd1), animation.value)!, borderRadius: BorderRadius.circular(8), width: 18),
-                      ]),
-                      BarChartGroupData(x: 4, barRods: [
-                        BarChartRodData(toY: 1.89, color: Color.lerp(const Color(0xFFa18cd1), const Color(0xFFfbc2eb), animation.value)!, borderRadius: BorderRadius.circular(8), width: 18),
-                        BarChartRodData(toY: 4.8, color: Color.lerp(const Color(0xFFfbc2eb), const Color(0xFFa18cd1), animation.value)!, borderRadius: BorderRadius.circular(8), width: 18),
-                      ]),
-                    ],
-                  ),
-                  swapAnimationDuration: const Duration(milliseconds: 900),
-                  swapAnimationCurve: Curves.easeInOut,
-                ),
-              ),
-            ],
+        Text(
+          '📈 Gráficos y Estadísticas',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Color(0xFF4B006E),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         _CurvedCard(
           animation: animation,
+          isDarkMode: isDarkMode,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Distribución de roles', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF8F7193))),
+              Text(
+                'Usuarios Activos por Mes',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Color(0xFF4B006E),
+                ),
+              ),
+              const SizedBox(height: 16),
               SizedBox(
-                height: 180,
-                child: PieChart(
-                  PieChartData(
-                    sections: [
-                      PieChartSectionData(
-                        value: 40,
-                        color: Color.lerp(const Color(0xFFa18cd1), const Color(0xFFfbc2eb), animation.value)!,
-                        title: 'Doctores',
-                        radius: 50,
-                        titleStyle: const TextStyle(color: Colors.white),
+                height: 200,
+                child: LineChart(
+                  LineChartData(
+                    gridData: FlGridData(show: false),
+                    titlesData: FlTitlesData(
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) => Text(
+                            value.toInt().toString(),
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
                       ),
-                      PieChartSectionData(
-                        value: 30,
-                        color: Color.lerp(const Color(0xFFfbc2eb), const Color(0xFFa18cd1), animation.value)!,
-                        title: 'Pacientes',
-                        radius: 50,
-                        titleStyle: const TextStyle(color: Colors.white),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) => Text(
+                            ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'][value.toInt()],
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
                       ),
-                      PieChartSectionData(
-                        value: 10,
-                        color: Color.lerp(const Color(0xFF7c3aed), const Color(0xFFa18cd1), animation.value)!,
-                        title: 'Admins',
-                        radius: 50,
-                        titleStyle: const TextStyle(color: Colors.white),
+                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: [
+                          FlSpot(0, 30),
+                          FlSpot(1, 45),
+                          FlSpot(2, 42),
+                          FlSpot(3, 55),
+                          FlSpot(4, 60),
+                          FlSpot(5, 58),
+                        ],
+                        isCurved: true,
+                        color: Color(0xFF8F7193),
+                        barWidth: 3,
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: Color(0xFF8F7193).withOpacity(0.3),
+                        ),
+                        dotData: FlDotData(show: false),
                       ),
                     ],
-                    sectionsSpace: 4,
-                    centerSpaceRadius: 30,
                   ),
-                  swapAnimationDuration: const Duration(milliseconds: 900),
-                  swapAnimationCurve: Curves.easeInOut,
                 ),
               ),
             ],
@@ -375,7 +523,10 @@ class _StatsSection extends StatelessWidget {
 // LOGS
 class _LogsSection extends StatelessWidget {
   final Animation<double> animation;
-  _LogsSection({required this.animation});
+  final bool isDarkMode;
+  
+  _LogsSection({required this.animation, required this.isDarkMode});
+  
   final logs = const [
     {
       'timestamp': '2025-06-13 22:14',
@@ -389,16 +540,16 @@ class _LogsSection extends StatelessWidget {
       'timestamp': '2025-06-13 22:20',
       'user': 'ana.romero@hormonalcare.com',
       'event': 'Intento fallido',
-      'ip': '192.168.0.42',
+      'ip': '10.0.0.5',
       'risk': 'Medio',
       'details': 'Lima, Perú\nEdge en Windows'
     },
     {
-      'timestamp': '2025-06-13 23:01',
-      'user': 'admin@hormonalcare.com',
-      'event': 'Eliminación de usuario',
-      'ip': '10.0.0.1',
-      'risk': 'Alto',
+      'timestamp': '2025-06-13 22:25',
+      'user': 'carlos.mendez@hormonalcare.com',
+      'event': 'Password Reset',
+      'ip': '172.16.0.8',
+      'risk': 'Bajo',
       'details': 'Lima, Perú\nSafari en macOS'
     },
   ];
@@ -408,31 +559,90 @@ class _LogsSection extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _CurvedCard(
+        Text(
+          '📋 Logs del Sistema',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Color(0xFF4B006E),
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...logs.map((log) => _CurvedCard(
           animation: animation,
+          isDarkMode: isDarkMode,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Logs de acceso y actividad', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF8F7193))),
-              const SizedBox(height: 8),
-              ...logs.map((log) => ExpansionTile(
-                title: Text('${log['timestamp']} - ${log['user']}'),
-                subtitle: Text('${log['event']} (${log['risk']})'),
+              Row(
                 children: [
-                  ListTile(
-                    title: Text('IP: ${log['ip']}'),
-                    subtitle: Text(log['details']!),
+                  Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    log['timestamp']!,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Color(0xFF4B006E),
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: log['risk'] == 'Bajo'
+                          ? Colors.green.withOpacity(0.2)
+                          : log['risk'] == 'Medio'
+                              ? Colors.orange.withOpacity(0.2)
+                              : Colors.red.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      log['risk']!,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: log['risk'] == 'Bajo'
+                            ? Colors.green[700]
+                            : log['risk'] == 'Medio'
+                                ? Colors.orange[700]
+                                : Colors.red[700],
+                      ),
+                    ),
                   ),
                 ],
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                backgroundColor: const Color(0xFFF6F2FF),
-                collapsedBackgroundColor: Colors.white,
-                textColor: const Color(0xFF4B006E),
-                iconColor: const Color(0xFF8F7193),
-              )),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Usuario: ${log['user']}',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+                ),
+              ),
+              Text(
+                'Evento: ${log['event']}',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+                ),
+              ),
+              Text(
+                'IP: ${log['ip']}',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+                ),
+              ),
+              Text(
+                'Detalles: ${log['details']}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDarkMode ? Colors.white60 : Colors.grey[600],
+                ),
+              ),
             ],
           ),
-        ),
+        )).toList(),
       ],
     );
   }
@@ -443,32 +653,42 @@ class _CurvedCard extends StatelessWidget {
   final Widget child;
   final double? width;
   final Animation<double> animation;
-  const _CurvedCard({required this.child, this.width, required this.animation});
+  final bool isDarkMode;
+  
+  const _CurvedCard({
+    required this.child,
+    this.width,
+    required this.animation,
+    required this.isDarkMode,
+  });
+  
   @override
   Widget build(BuildContext context) {
     final t = animation.value;
     return Container(
       width: width,
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Color.lerp(const Color(0xFFa18cd1), const Color(0xFFfbc2eb), t)!,
-          width: 3,
+          color: isDarkMode 
+              ? Color(0xFF4A4A4A)
+              : Color(0xFF8F7193).withOpacity(0.6 + 0.4 * sin(t * 6 * pi)),
+          width: 2,
         ),
-        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Color.lerp(const Color(0xFFa18cd1), const Color(0xFFfbc2eb), t)!.withOpacity(0.18),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.3)
+                : Color(0xFF8F7193).withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: child,
-      ),
+      child: child,
     );
   }
 }
