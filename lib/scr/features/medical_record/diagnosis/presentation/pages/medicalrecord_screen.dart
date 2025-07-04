@@ -1,3 +1,4 @@
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/medical_record/diagnosis/domain/usecases/fakechat_api.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -14,7 +15,10 @@ import '../../domain/services/medicalrecord_service.dart';
 import '../../domain/models/medicationpost_model.dart';
 import '../../domain/models/prescriptionpost_model.dart';
 import '../../domain/models/medicaltype_model.dart';
-//import '../../domain/services/firebase_storage_service.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/communication/data/data_sources/remote/communication_api.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
+
+
 
 class MedicalRecordScreen extends StatefulWidget {
   final String patientId;
@@ -26,6 +30,7 @@ class MedicalRecordScreen extends StatefulWidget {
 }
 
 class _MedicalRecordScreenState extends State<MedicalRecordScreen> with SingleTickerProviderStateMixin {
+
   late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
   late Future<Patient> _patientFuture;
@@ -172,7 +177,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> with SingleTi
     return age;
   }
 
-   Widget _buildPatientHeader(Patient patient) {
+  Widget _buildPatientHeader(Patient patient) {
     return GestureDetector(
       onTap: () => _showPatientInfo(patient),
       child: Container(
@@ -237,7 +242,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> with SingleTi
         tabs: [
           Tab(text: 'Patient History'),
           Tab(text: 'Diagnosis & Treatments'),
-          Tab(text: 'Medical Tests'),
+          Tab(text: 'Chat with Patient'),
           Tab(text: 'External Reports')
         ],
       ),
@@ -252,7 +257,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> with SingleTi
 
         _buildPatientHistoryTab(patient),
         _buildDiagnosisAndTreatmentsTab(patient.id), // Usar el medicalRecordId
-        _buildMedicalTestsTab(patient.id), // Convertir patientId y medicalRecordId a String
+        _buildChatWithPatientTab(patient), // Cambiado aquí
         _buildExternalReportsTab(patient.id)
       ],
     ),
@@ -385,13 +390,6 @@ void _showEditDialog(String title, String initialValue, Function(String) onSave)
       print('Exception updating family history: $e');
     }
   }
-
-
-
-
-
-
-
 
 Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
   print('medicalrecordid: $medicalRecordId');
@@ -899,9 +897,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
 
   }
 
-
-
-    Widget _AddPrescriptionDialog(int medicalRecordId) {
+  Widget _AddPrescriptionDialog(int medicalRecordId) {
     final _formKey = GlobalKey<FormState>();
     final _prescriptionPost = PrescriptionPost(
       medicalRecordId: medicalRecordId,
@@ -1063,277 +1059,25 @@ Widget _AddTreatmentDialog(int medicalRecordId) {
 }
 
 
-
-
-// Medical Tests Tab
-
-  // Función para subir archivos (Firebase deshabilitado temporalmente)
-Future<void> _uploadFile(int patientId) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      PlatformFile file = result.files.first;
-      try {
-        // TODO: Reactivar Firebase Storage cuando esté configurado
-        // await FirebaseStorage.instance
-        //     .ref('medical_tests/$patientId/${file.name}')
-        //     .putFile(File(file.path!));
-        setState(() {}); // Refresh the UI
-      } catch (e) {
-        print('Error uploading file: $e');
+Widget _buildChatWithPatientTab(Patient patient) {
+  return FutureBuilder<int?>(
+    future: JwtStorage.getProfileId(),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) {
+        return Center(child: CircularProgressIndicator());
       }
-    }
-  }
-
-Future<void> _downloadFile(String url, String fileName) async {
-  try {
-    final Directory? downloadsDir = Directory('/storage/emulated/0/Download');
-
-    if (downloadsDir != null && downloadsDir.existsSync()) {
-      final savePath = '${downloadsDir.path}/$fileName';
-      final dio = Dio();
-      await dio.download(url, savePath);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('File downloaded to $savePath')),
+      final doctorProfileId = snapshot.data!;
+      final patientProfileId = patient.profile?.id ?? 0;
+      return _ChatLocalWidget(
+        doctorProfileId: doctorProfileId,
+        patientProfileId: patientProfileId,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not access downloads folder')),
-      );
-    }
-  } catch (e) {
-    print('Error al descargar archivo: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error al descargar archivo: $e')),
-    );
-  }
-}
-
-// Función para eliminar archivos (Firebase deshabilitado temporalmente)
-  Future<void> _deleteFile(int patientId, String fileName) async {
-    try {
-      // TODO: Reactivar Firebase Storage cuando esté configurado
-      // await FirebaseStorage.instance.ref('medical_tests/$patientId/$fileName').delete();
-      setState(() {}); // Refresh the UI
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('File deleted successfully')),
-      );
-    } catch (e) {
-      print('Error deleting file: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting file: $e')),
-      );
-    }
-  }
-
-// TODO: Reactivar esta función cuando Firebase esté configurado correctamente
-/*
-Future<DateTime?> _getFileModificationDate(int patientId, String fileName) async {
-  try {
-    final ref = FirebaseStorage.instance.ref('medical_tests/$patientId/$fileName');
-    final metadata = await ref.getMetadata();
-    return metadata.updated;
-  } catch (e) {
-    print('Error getting file modification date: $e');
-    return null;
-  }
-}
-*/
-
-Widget _buildMedicalTestsTab(int patientId) {
-  return Stack(
-    children: [
-      FutureBuilder<List<Map<String, String>>>(
-        // TODO: Reactivar esta línea cuando Firebase esté configurado correctamente
-        // future: FirebaseStorageService().getMedicalTests(patientId),
-        future: Future.value([]), // Temporalmente devuelve una lista vacía
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No medical tests found'));
-          } else {
-            final tests = snapshot.data!;
-            return ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: tests.length,
-              itemBuilder: (context, index) {
-                final test = tests[index];
-                // TODO: Reactivar esta sección cuando Firebase esté configurado correctamente
-                /*
-                return FutureBuilder<DateTime?>(
-                  future: _getFileModificationDate(patientId, test['name']!),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    } else {
-                      final modificationDate = snapshot.data;
-                      return _buildTestItem(test['name']!, test['url']!, modificationDate, patientId);
-                    }
-                  },
-                );
-                */
-                return _buildTestItem(test['name']!, test['url']!, null, patientId); // Temporalmente sin fecha
-              },
-            );
-          }
-        },
-      ),
-      Positioned(
-        bottom: 16,
-        right: 16,
-        child: FloatingActionButton(
-          // TODO: Reactivar esta línea cuando Firebase esté configurado correctamente
-          // onPressed: () => _uploadExternalReport(patientId),
-          onPressed: () {}, // Temporalmente deshabilitado
-          backgroundColor: Colors.grey[300], // Color de fondo gris claro
-          child: Icon(Icons.upload),
-        ),
-      ),
-    ],
+    },
   );
 }
-Widget _buildTestItem(String testName, String url, DateTime? modificationDate, int patientId) {
-  return Container(
-    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-    margin: EdgeInsets.only(bottom: 10),
-    decoration: BoxDecoration(
-      color: Colors.grey[200],
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          flex: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                testName,
-                style: TextStyle(fontSize: 16),
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (modificationDate != null)
-                Text(
-                  DateFormat('yyyy-MM-dd').format(modificationDate),
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-            ],
-          ),
-        ),
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(Icons.download, size: 24, color: Colors.blue),
-              onPressed: () async {
-                await _downloadFile(url, testName);
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.delete, size: 24, color: Colors.red),
-              onPressed: () async {
-                await _deleteFile(patientId, testName);
-              },
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-
-
-
 
 
 // External Reports Tab
-
-// TODO: Reactivar esta función cuando Firebase esté configurado correctamente
-/*
-Future<void> _uploadExternalReport(int patientId) async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-  if (result != null) {
-    PlatformFile file = result.files.first;
-    try {
-      await FirebaseStorage.instance
-          .ref('external_reports/$patientId/${file.name}')
-          .putFile(File(file.path!));
-      setState(() {}); // Refresh the UI
-    } catch (e) {
-      print('Error uploading file: $e');
-    }
-  }
-}
-*/
-
-// TODO: Reactivar esta función cuando Firebase esté configurado correctamente
-/*
-Future<void> _downloadExternalReport(String url, String fileName) async {
-  try {
-    final Directory? downloadsDir = Directory('/storage/emulated/0/Download');
-
-    if (downloadsDir != null && downloadsDir.existsSync()) {
-      final savePath = '${downloadsDir.path}/$fileName';
-      final dio = Dio();
-      await dio.download(url, savePath);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('File downloaded to $savePath')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not access downloads folder')),
-      );
-    }
-  } catch (e) {
-    print('Error al descargar archivo: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error al descargar archivo: $e')),
-    );
-  }
-}
-*/
-
-// TODO: Reactivar esta función cuando Firebase esté configurado correctamente
-/*
-Future<void> _deleteExternalReport(int patientId, String fileName) async {
-  try {
-    await FirebaseStorage.instance.ref('external_reports/$patientId/$fileName').delete();
-    setState(() {}); // Refresh the UI
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('File deleted successfully')),
-    );
-  } catch (e) {
-    print('Error deleting file: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error deleting file: $e')),
-    );
-  }
-}
-*/
-
-// TODO: Reactivar esta función cuando Firebase esté configurado correctamente
-/*
-Future<DateTime?> _getExternalReportModificationDate(int patientId, String fileName) async {
-  try {
-    final ref = FirebaseStorage.instance.ref('external_reports/$patientId/$fileName');
-    final metadata = await ref.getMetadata();
-    return metadata.updated;
-  } catch (e) {
-    print('Error getting file modification date: $e');
-    return null;
-  }
-}
-*/
-
 Widget _buildExternalReportsTab(int patientId) {
   return Stack(
     children: [
@@ -1391,7 +1135,6 @@ Widget _buildExternalReportsTab(int patientId) {
     ],
   );
 }
-
 Widget _buildReportItem(String reportName, String url, DateTime? modificationDate, int patientId) {
   return Container(
     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -1499,5 +1242,138 @@ Widget _buildReportItem(String reportName, String url, DateTime? modificationDat
       return 'https://$imageUrl';
     }
     return imageUrl;
+  }
+}
+
+class _ChatLocalWidget extends StatefulWidget {
+  final int doctorProfileId;
+  final int patientProfileId;
+
+  const _ChatLocalWidget({
+    required this.doctorProfileId,
+    required this.patientProfileId,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<_ChatLocalWidget> createState() => _ChatLocalWidgetState();
+}
+
+class _ChatLocalWidgetState extends State<_ChatLocalWidget> {
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  List<Map<String, dynamic>> _messages = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages();
+  }
+
+  Future<void> _loadMessages() async {
+    final msgs = await FakeChatApi.getMessages(widget.doctorProfileId, widget.patientProfileId);
+    setState(() {
+      _messages = msgs;
+      _loading = false;
+    });
+    _scrollToBottom();
+  }
+
+  Future<void> _sendMessage() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    final msg = {
+      'text': text,
+      'senderProfileId': widget.doctorProfileId,
+      'receiverProfileId': widget.patientProfileId,
+      'sentAt': DateTime.now().toIso8601String(),
+    };
+    await FakeChatApi.addMessage(widget.doctorProfileId, widget.patientProfileId, msg);
+    _controller.clear();
+    await _loadMessages();
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _messages.length,
+            itemBuilder: (context, idx) {
+              final msg = _messages[idx];
+              final isMe = msg['senderProfileId'] == widget.doctorProfileId;
+              return ListTile(
+                title: Align(
+                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isMe ? Color(0xFFE2D1F4) : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(msg['text'] ?? ''),
+                  ),
+                ),
+                subtitle: Align(
+                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Text(
+                    msg['sentAt'] != null
+                        ? DateFormat('hh:mm a').format(DateTime.parse(msg['sentAt']))
+                        : '',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        Divider(height: 1),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: 'Type a message...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: null,
+                  onSubmitted: (_) => _sendMessage(),
+                ),
+              ),
+              SizedBox(width: 8),
+              FloatingActionButton(
+                mini: true,
+                backgroundColor: Color(0xFFA78AAB),
+                child: Icon(Icons.send, color: Colors.white),
+                onPressed: _sendMessage,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
