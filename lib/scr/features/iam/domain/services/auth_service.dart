@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/greeting_session_service.dart';
 
 class AuthService {
   final String baseUrl = 'http://localhost:8080/api/v1';
@@ -46,8 +47,11 @@ class AuthService {
         if (role == 'ROLE_DOCTOR' && profileId != null) {
           await fetchAndSaveDoctorId(profileId, token);
         } else if (role == 'ROLE_PATIENT' && profileId != null) {
-          await fetchAndSavePatientId(profileId, token); // Lógica para pacientes
+          await fetchAndSavePatientId(profileId, token);
         }
+
+        // ✅ NUEVO: Marcar nueva sesión para el saludo
+        await GreetingSessionService.markNewSession();
   
         return token;
       } else {
@@ -69,7 +73,7 @@ class AuthService {
       final patientId = patientData['id'];
   
       if (patientId != null) {
-        await JwtStorage.savePatientId(patientId); // Guardar el ID del paciente
+        await JwtStorage.savePatientId(patientId);
       } else {
         throw Exception('Patient ID is null');
       }
@@ -128,11 +132,8 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    // NO limpiar el tema - se mantiene global
+    // ✅ NUEVO: Limpiar sesión de saludo al cerrar sesión
+    await GreetingSessionService.clearGreetingSession();
     await JwtStorage.clearAll();
   }
-
-
-
-
 }

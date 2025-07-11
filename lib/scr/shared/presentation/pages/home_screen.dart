@@ -9,6 +9,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/profile/
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/notice_manager.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/data/theme_service.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/greeting_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? role;
   int? doctorId;
   bool _isDarkMode = false;
+  bool _showGreeting = true; // Nueva variable para controlar el saludo
 
   List<Widget> _widgetOptions = [];
 
@@ -31,6 +33,18 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadRoleAndDoctorId();
     _loadNotice();
     _loadTheme();
+    _startGreetingTimer(); // Nueva función para manejar el saludo
+  }
+
+  // Nueva función para controlar la duración del saludo
+  void _startGreetingTimer() {
+    Future.delayed(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() {
+          _showGreeting = false;
+        });
+      }
+    });
   }
 
   Future<void> _loadTheme() async {
@@ -106,7 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {});
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8F7193),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: const Text('Aceptar', style: TextStyle(color: Colors.white)),
@@ -123,51 +136,64 @@ class _HomeScreenState extends State<HomeScreen> {
     final notice = NoticeManager.currentNotice;
     return Scaffold(
       backgroundColor: _isDarkMode ? Color(0xFF1E1E1E) : Color(0xFFF5F5F5),
-      body: Column(
+      body: Stack( // Cambiamos Column por Stack para superponer el saludo
         children: [
-          if (notice != null)
-            Container(
-              color: _isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFFFF3CD),
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _showNoticeDetail(notice),
-                      child: Text(
-                        notice['title'] ?? '',
-                        style: TextStyle(
-                          color: _isDarkMode ? Colors.white : Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          decoration: TextDecoration.underline,
+          Column(
+            children: [
+              if (notice != null)
+                Container(
+                  color: _isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFFFF3CD),
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: _isDarkMode ? Colors.white : Color(0xFF856404),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _showNoticeDetail(notice),
+                          child: Text(
+                            notice['title'] ?? 'Nuevo aviso disponible',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: _isDarkMode ? Colors.white : Color(0xFF856404),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
-                    ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: _isDarkMode ? Colors.white : Color(0xFF856404),
+                        size: 20,
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.close, 
-                      color: _isDarkMode ? Colors.white : Colors.black
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        NoticeManager.clearNotice();
-                      });
-                    },
-                  ),
-                ],
+                ),
+              Expanded(
+                child: _widgetOptions.isNotEmpty
+                    ? _widgetOptions[_selectedIndex]
+                    : Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFA788AB),
+                        )
+                      ),
               ),
-            ),
-          Expanded(
-            child: _widgetOptions.isNotEmpty
-                ? _widgetOptions[_selectedIndex]
-                : Center(
-                    child: CircularProgressIndicator(
-                      color: _isDarkMode ? Colors.white : Color(0xFF8F7193),
-                    )
-                  ),
+            ],
           ),
+          // Saludo superpuesto
+          if (_showGreeting)
+            Positioned(
+              top: notice != null ? 60 : 20, // Ajustar posición si hay aviso
+              left: 0,
+              right: 0,
+              child: const GreetingWidget(),
+            ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

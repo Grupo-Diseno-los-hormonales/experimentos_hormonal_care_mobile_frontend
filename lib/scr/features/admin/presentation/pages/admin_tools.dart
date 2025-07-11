@@ -7,6 +7,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/doma
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/presentation/pages/sign_in.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/greeting_widget.dart';
 import 'package:provider/provider.dart';
 
 class AdminToolsScreen extends StatefulWidget {
@@ -127,6 +128,13 @@ class _AdminToolsScreenState extends State<AdminToolsScreen> with TickerProvider
                       SendNoticeScreen(),
                       const AdminGlobalChatSection(),
                     ],
+                  ),
+                  // ✅ SALUDO AGREGADO - Solo esto es nuevo
+                  const Positioned(
+                    top: 20,
+                    left: 0,
+                    right: 0,
+                    child: GreetingWidget(),
                   ),
                 ],
               ),
