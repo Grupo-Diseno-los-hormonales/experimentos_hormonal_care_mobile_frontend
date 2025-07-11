@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+// ✅ NUEVO: Imports agregados para cerrar sesión
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/domain/services/auth_service.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/presentation/pages/sign_in.dart';
 
 class TreatmentTrackerScreen extends StatefulWidget {
   const TreatmentTrackerScreen({Key? key}) : super(key: key);
@@ -32,6 +35,9 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
   final String _lastLogDateKey = 'last_log_date';
   final String _weeklyProgressKey = 'weekly_progress';
   final String _logHistoryKey = 'log_history';
+  
+  // ✅ NUEVO: AuthService para cerrar sesión
+  final AuthService _authService = AuthService();
   
   @override
   void initState() {
@@ -219,6 +225,71 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
       ),
     );
   }
+
+  // ✅ NUEVO: Función para cerrar sesión
+  Future<void> _logout() async {
+    Provider.of<ThemeProvider>(context, listen: false).clearTheme();
+    await _authService.logout();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => SignIn()),
+      (route) => false,
+    );
+  }
+
+  // ✅ NUEVO: Función para mostrar el diálogo de confirmación
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return AlertDialog(
+              backgroundColor: themeProvider.isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
+              title: Text(
+                'Confirm Logout',
+                style: TextStyle(
+                  color: themeProvider.isDarkMode ? Colors.white : Color(0xFF8F7193),
+                ),
+              ),
+              content: Text(
+                'Are you sure you want to log out?',
+                style: TextStyle(
+                  color: themeProvider.isDarkMode ? Colors.white70 : Color(0xFFA788AB),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: themeProvider.isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text(
+                    'Yes',
+                    style: TextStyle(
+                      color: themeProvider.isDarkMode ? Colors.white : Color(0xFF8F7193),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _logout();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
   
   @override
   void dispose() {
@@ -233,6 +304,27 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
       builder: (context, themeProvider, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          // ✅ NUEVO: AppBar agregado con botón de logout
+          appBar: AppBar(
+            backgroundColor: themeProvider.isDarkMode 
+                ? Color(0xFF2D2D2D) 
+                : Color(0xFF8F7193),
+            title: const Text(
+              'Treatment Tracker',
+              style: TextStyle(color: Colors.white),
+            ),
+            centerTitle: true,
+            iconTheme: IconThemeData(color: Colors.white),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                ),
+                onPressed: _showLogoutDialog,
+              ),
+            ],
+          ),
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),

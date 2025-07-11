@@ -42,6 +42,59 @@ class _AdminToolsScreenState extends State<AdminToolsScreen> with TickerProvider
     );
   }
 
+  // ✅ NUEVO: Función para mostrar el diálogo de confirmación
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return AlertDialog(
+              backgroundColor: themeProvider.isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
+              title: Text(
+                'Confirm Logout',
+                style: TextStyle(
+                  color: themeProvider.isDarkMode ? Colors.white : Color(0xFF8F7193),
+                ),
+              ),
+              content: Text(
+                'Are you sure you want to log out?',
+                style: TextStyle(
+                  color: themeProvider.isDarkMode ? Colors.white70 : Color(0xFFA788AB),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: themeProvider.isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text(
+                    'Yes',
+                    style: TextStyle(
+                      color: themeProvider.isDarkMode ? Colors.white : Color(0xFF8F7193),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _logout();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -72,13 +125,13 @@ class _AdminToolsScreenState extends State<AdminToolsScreen> with TickerProvider
                       ),
                     ),
                     const Spacer(),
-                    // Solo botón de logout - SIN botón de modo oscuro
+                    // ✅ MODIFICADO: Ahora llama a _showLogoutDialog en lugar de _logout
                     IconButton(
                       icon: Icon(
                         Icons.logout,
                         color: Theme.of(context).appBarTheme.foregroundColor,
                       ),
-                      onPressed: _logout,
+                      onPressed: _showLogoutDialog,
                     ),
                     const SizedBox(width: 16),
                   ],
