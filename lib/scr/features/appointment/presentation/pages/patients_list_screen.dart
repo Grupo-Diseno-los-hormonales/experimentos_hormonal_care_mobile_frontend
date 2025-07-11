@@ -7,6 +7,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointm
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:intl/intl.dart'; // ✅ SOLO AGREGADO - Para formatear la fecha
 
 class HomePatientsScreen extends StatefulWidget {
   final int doctorId;
@@ -102,6 +103,14 @@ class _HomePatientsScreenState extends State<HomePatientsScreen> {
     }
     return age;
   }
+
+  // ✅ SOLO AGREGADO - Función para obtener la fecha actual en inglés
+  String _getCurrentDateFormatted() {
+    final now = DateTime.now();
+    final formatter = DateFormat('EEEE, MMMM d, y', 'en_US');
+    return formatter.format(now);
+  }
+
 @override
 Widget build(BuildContext context) {
   final limaTimeZone = tz.getLocation('America/Lima');
@@ -110,13 +119,29 @@ Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       backgroundColor: const Color(0xFF8F7193), // Fondo morado del AppBar
-      title: const Text("Today's Patients"),
-      centerTitle: true,
-      titleTextStyle: const TextStyle(
-        color: Colors.white,
-        fontSize: 20.0,
-        fontWeight: FontWeight.bold,
+      title: Column(
+        mainAxisSize: MainAxisSize.min, // ✅ SOLO AGREGADO
+        children: [
+          const Text(
+            "Today's Patients",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          // ✅ SOLO AGREGADO - Subtítulo con la fecha actual en inglés
+          Text(
+            _getCurrentDateFormatted(),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14.0,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ],
       ),
+      centerTitle: true,
     ),
     body: Column(
       children: [
