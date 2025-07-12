@@ -242,6 +242,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                     itemBuilder: (context, index) {
                       final specialty = _specialties[index];
                       final isSelected = specialty == _selectedSpecialty;
+                      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
                       
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
@@ -249,8 +250,11 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                           label: Text(specialty),
                           selected: isSelected,
                           selectedColor: const Color(0xFFA78AAB),
+                          backgroundColor: isDarkMode ? const Color(0xFF424242) : null, // Gris claro en modo oscuro
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
+                            color: isSelected 
+                                ? Colors.white 
+                                : (isDarkMode ? Colors.grey[200] : Colors.black), // Texto más claro en modo oscuro
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           ),
                           onSelected: (selected) {
@@ -380,9 +384,12 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
   }
 
   Widget _buildDoctorCard(Map<String, dynamic> doctor) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
+      color: isDarkMode ? const Color(0xFF424242) : null, // Gris más claro en modo oscuro
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -400,7 +407,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                 backgroundImage: doctor['imageUrl'] != null
                     ? NetworkImage(doctor['imageUrl'])
                     : null,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: isDarkMode ? Colors.grey[600] : Colors.grey[200],
                 child: doctor['imageUrl'] == null
                     ? const Icon(Icons.person, size: 40, color: Color(0xFFA78AAB))
                     : null,
@@ -433,7 +440,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                         : (AppLocalizations.of(context)?.generalMedicineLabel ?? 'General Medicine'),
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: isDarkMode ? Colors.grey[300] : Colors.grey[600], // Más claro en modo oscuro
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -466,9 +473,12 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
   }
 
   void _showDoctorDetails(Map<String, dynamic> doctor) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: isDarkMode ? const Color(0xFF424242) : null, // Fondo más claro en modo oscuro
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -490,7 +500,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                     backgroundImage: doctor['imageUrl'] != null
                         ? NetworkImage(doctor['imageUrl'])
                         : null,
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: isDarkMode ? Colors.grey[600] : Colors.grey[200],
                     child: doctor['imageUrl'] == null
                         ? const Icon(Icons.person, size: 40, color: Color(0xFFA78AAB))
                         : null,

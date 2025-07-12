@@ -292,7 +292,9 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE2D1F4),
+                        color: Theme.of(context).brightness == Brightness.dark 
+                          ? const Color(0xFF424242) 
+                          : const Color(0xFFE2D1F4),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Center(
@@ -352,9 +354,11 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                 
                 // Mostrar indicador de carga o mensaje de error
                 if (_isLoading)
-                  const Center(
+                  Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFFBFA2C7),
+                      color: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF9E9E9E) 
+                        : const Color(0xFFBFA2C7),
                     ),
                   )
                 else if (_errorMessage.isNotEmpty)
@@ -393,7 +397,9 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFBFA2C7),
+                            color: Theme.of(context).brightness == Brightness.dark 
+                              ? const Color(0xFF424242) 
+                              : const Color(0xFFBFA2C7),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           padding: const EdgeInsets.all(16),
@@ -418,7 +424,9 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                               // Nombre y dosis de la medicación
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                    ? const Color(0xFF616161) 
+                                    : Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 padding: const EdgeInsets.all(12),
@@ -433,9 +441,12 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                                         Expanded(
                                           child: Text(
                                             medication.drugName ?? (AppLocalizations.of(context)?.unknownMedicationLabel ?? 'Unknown medication'),
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
+                                              color: Theme.of(context).brightness == Brightness.dark 
+                                                ? Colors.white 
+                                                : Colors.black,
                                             ),
                                           ),
                                         ),
@@ -452,8 +463,11 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                                         const SizedBox(width: 8),
                                         Text(
                                           '${AppLocalizations.of(context)?.dosageLabel ?? "Dosage:"} ${_formatDosage(medication)}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 14,
+                                            color: Theme.of(context).brightness == Brightness.dark 
+                                              ? Colors.grey[300] 
+                                              : Colors.grey[600],
                                           ),
                                         ),
                                       ],
@@ -469,8 +483,11 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                                             const SizedBox(width: 8),
                                             Text(
                                               '${AppLocalizations.of(context)?.frequencyLabel ?? "Frequency:"} ${_formatFrequency(medication)}',
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 14,
+                                                color: Theme.of(context).brightness == Brightness.dark 
+                                                  ? Colors.grey[300] 
+                                                  : Colors.grey[600],
                                               ),
                                             ),
                                           ],
@@ -487,8 +504,11 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                                             const SizedBox(width: 8),
                                             Text(
                                               '${AppLocalizations.of(context)?.durationLabel ?? "Duration:"} ${medication.duration}',
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 14,
+                                                color: Theme.of(context).brightness == Brightness.dark 
+                                                  ? Colors.grey[300] 
+                                                  : Colors.grey[600],
                                               ),
                                             ),
                                           ],
@@ -510,7 +530,9 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                 // Sección de exámenes
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFBFA2C7),
+                    color: Theme.of(context).brightness == Brightness.dark 
+                      ? const Color(0xFF424242) 
+                      : const Color(0xFFBFA2C7),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   padding: const EdgeInsets.all(16),
@@ -522,6 +544,7 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -578,7 +601,9 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                   const SizedBox(height: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE2D1F4),
+                      color: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF424242) 
+                        : const Color(0xFFE2D1F4),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.all(16),
@@ -590,6 +615,9 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.white 
+                              : Colors.black,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -634,7 +662,9 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                   child: ElevatedButton(
                     onPressed: _pickFiles,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFBFA2C7),
+                      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF424242) 
+                        : const Color(0xFFBFA2C7),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),

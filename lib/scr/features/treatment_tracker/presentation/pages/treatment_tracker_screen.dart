@@ -77,9 +77,6 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
   
   // Inicializar el progreso semanal basado en el día actual
   void _initializeWeeklyProgress() {
-    final now = DateTime.now();
-    final currentWeekday = now.weekday % 7; // 0 = domingo, 1 = lunes, ..., 6 = sábado
-    
     _weeklyProgress = List.generate(7, (index) {
       // Marcar días pasados de la semana actual como no completados
       return false;
@@ -337,7 +334,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFE2D1F4),
+                      color: themeProvider.isDarkMode ? Color(0xFF7E7E7E) : Color(0xFFE2D1F4),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -392,7 +389,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade200,
+                        color: themeProvider.isDarkMode ? Color(0xFF7E7E7E) : Colors.grey.shade200,
                       ),
                     ),
                     padding: const EdgeInsets.all(16),
@@ -424,13 +421,13 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                                 shape: BoxShape.circle,
                                 color: _weeklyProgress[index]
                                     ? Theme.of(context).primaryColor
-                                    : (themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade200),
+                                    : (themeProvider.isDarkMode ? Color(0xFF7E7E7E) : Colors.grey.shade200),
                               ),
                             );
                           }),
                         ),
                         const SizedBox(height: 16),
-                        Divider(color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade300),
+                        Divider(color: themeProvider.isDarkMode ? Color(0xFF7E7E7E) : Colors.grey.shade300),
                         const SizedBox(height: 8),
                         Text(
                           AppLocalizations.of(context)?.keepGoingMessage ?? "Keep going like this!",
@@ -458,7 +455,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                   // Campo de glucosa
                   Container(
                     decoration: BoxDecoration(
-                      color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFBFA2C7),
+                      color: themeProvider.isDarkMode ? Color(0xFF8F7193) : Color(0xFFBFA2C7),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -502,7 +499,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                   // Campo de insulina
                   Container(
                     decoration: BoxDecoration(
-                      color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFBFA2C7),
+                      color: themeProvider.isDarkMode ? Color(0xFF8F7193) : Color(0xFFBFA2C7),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -617,7 +614,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                                 ),
                                 Divider(
                                   height: 1,
-                                  color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade300,
+                                  color: themeProvider.isDarkMode ? Color(0xFF7E7E7E) : Colors.grey.shade300,
                                 ),
                               ],
                             );
@@ -629,7 +626,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                   Center(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Color(0xFF8F7193),
+                        backgroundColor: themeProvider.isDarkMode ? Color(0xFFA788AB) : Color(0xFF8F7193),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),

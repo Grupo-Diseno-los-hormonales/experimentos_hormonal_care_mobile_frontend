@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/presentation/pages/patients_list_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/medical_record/medical_prescription/presentation/pages/patients_list_screen.dart';
-import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/medical_record/medical_prescription/presentation/pages/medical_prescription_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/presentation/pages/appointment_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/notifications/presentation/pages/notification_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/profile/presentation/pages/doctor_profile_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/profile/presentation/pages/patient_profile_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/notice_manager.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
-import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/data/theme_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/greeting_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -23,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String? role;
   int? doctorId;
-  bool _isDarkMode = false;
   bool _showGreeting = true; // Nueva variable para controlar el saludo
 
   List<Widget> _widgetOptions = [];
@@ -33,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadRoleAndDoctorId();
     _loadNotice();
-    _loadTheme();
     _startGreetingTimer(); // Nueva función para manejar el saludo
   }
 
@@ -45,13 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _showGreeting = false;
         });
       }
-    });
-  }
-
-  Future<void> _loadTheme() async {
-    final isDark = await ThemeService.isDarkMode();
-    setState(() {
-      _isDarkMode = isDark;
     });
   }
 
@@ -85,10 +74,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showNoticeDetail(Map<String, dynamic> notice) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: _isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
+        backgroundColor: isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -100,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 20, 
                   fontWeight: FontWeight.bold, 
-                  color: _isDarkMode ? Colors.white : Color(0xFF8F7193)
+                  color: isDarkMode ? Colors.white : Color(0xFF8F7193)
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -109,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 notice['body'] ?? '',
                 style: TextStyle(
                   fontSize: 16, 
-                  color: _isDarkMode ? Colors.white70 : Color(0xFF4B006E)
+                  color: isDarkMode ? Colors.white70 : Color(0xFF4B006E)
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -135,21 +126,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final notice = NoticeManager.currentNotice;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: _isDarkMode ? Color(0xFF1E1E1E) : Color(0xFFF5F5F5),
+      backgroundColor: isDarkMode ? Color(0xFF1E1E1E) : Color(0xFFF5F5F5),
       body: Stack( // Cambiamos Column por Stack para superponer el saludo
         children: [
           Column(
             children: [
               if (notice != null)
                 Container(
-                  color: _isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFFFF3CD),
+                  color: isDarkMode ? Color(0xFF4A4A4A) : Color(0xFFFFF3CD),
                   padding: const EdgeInsets.all(10),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: _isDarkMode ? Colors.white : Color(0xFF856404),
+                        color: isDarkMode ? Colors.white : Color(0xFF856404),
                         size: 20,
                       ),
                       const SizedBox(width: 8),
@@ -161,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: _isDarkMode ? Colors.white : Color(0xFF856404),
+                              color: isDarkMode ? Colors.white : Color(0xFF856404),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -170,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Icon(
                         Icons.chevron_right,
-                        color: _isDarkMode ? Colors.white : Color(0xFF856404),
+                        color: isDarkMode ? Colors.white : Color(0xFF856404),
                         size: 20,
                       ),
                     ],
@@ -199,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: _isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
+        backgroundColor: isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -224,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: const Color(0xFFA788AB),
-        unselectedItemColor: _isDarkMode ? Colors.white70 : Color(0xFF8F7193),
+        unselectedItemColor: isDarkMode ? Colors.white70 : Color(0xFF8F7193),
         onTap: _onItemTapped,
       ),
     );
