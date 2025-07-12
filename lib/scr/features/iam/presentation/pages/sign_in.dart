@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/domain/services/auth_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/pages/home_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/pages/home_screen_patient.dart';
@@ -11,6 +12,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/pres
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/admin/presentation/pages/admin_tools.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/puzzle_captcha_dialog.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/widgets/language_button.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -178,7 +180,7 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid credentials')),
+            SnackBar(content: Text(AppLocalizations.of(context)?.invalidCredentialsMessage ?? 'Invalid credentials')),
           );
         }
       } catch (e) {
@@ -188,7 +190,7 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
       }
     } else if (!_captchaVerified) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please verify the CAPTCHA')),
+        SnackBar(content: Text(AppLocalizations.of(context)?.pleaseVerifyCaptchaMessage ?? 'Please verify the CAPTCHA')),
       );
     }
   }
@@ -321,7 +323,7 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                       return Opacity(
                                         opacity: value,
                                         child: Text(
-                                          "Welcome to HormonalCare",
+                                          AppLocalizations.of(context)?.welcomeMessage ?? 'Welcome to HormonalCare',
                                           style: TextStyle(
                                             fontSize: 28,
                                             fontWeight: FontWeight.bold,
@@ -337,7 +339,7 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    "Sign in to continue",
+                                    AppLocalizations.of(context)?.continueText ?? "Sign in to continue",
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: themeProvider.isDarkMode 
@@ -360,8 +362,8 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                         fontSize: 16,
                                       ),
                                       decoration: InputDecoration(
-                                        labelText: 'Username', // ← CORREGIDO: Username
-                                        hintText: 'Enter your username', // ← CORREGIDO
+                                        labelText: AppLocalizations.of(context)?.labelUsername ?? 'Username', // ← CORREGIDO: Username
+                                        hintText: AppLocalizations.of(context)?.enterUsernameHint ?? 'Enter your username',
                                         prefixIcon: Icon(
                                           Icons.person_outline, // ← CORREGIDO: icono de persona
                                           color: Color(0xFF8F7193),
@@ -398,11 +400,11 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                       ),
                                       validator: (value) {
                                         if (value?.isEmpty ?? true) {
-                                          return 'Please enter your username'; // ← CORREGIDO
+                                          return AppLocalizations.of(context)?.pleaseEnterYourUsername ?? 'Please enter your username'; // ← CORREGIDO
                                         }
                                         // ✅ VALIDACIÓN SIMPLE PARA USERNAME
                                         if (value!.length < 3) {
-                                          return 'Username must be at least 3 characters';
+                                          return AppLocalizations.of(context)?.atLeast3Characters ?? 'Username must be at least 3 characters';
                                         }
                                         return null;
                                       },
@@ -421,8 +423,8 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                       fontSize: 16,
                                     ),
                                     decoration: InputDecoration(
-                                      labelText: 'Password',
-                                      hintText: 'Enter your password',
+                                      labelText: AppLocalizations.of(context)?.enterPasswordHint ?? 'Password',
+                                      hintText: AppLocalizations.of(context)?.enterPasswordHint ?? 'Enter your password',
                                       prefixIcon: Icon(
                                         Icons.lock_outline,
                                         color: Color(0xFF8F7193),
@@ -478,7 +480,7 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                     ),
                                     validator: (value) {
                                       if (value?.isEmpty ?? true) {
-                                        return 'Please enter your password';
+                                        return AppLocalizations.of(context)?.pleaseEnterYourPassword ?? 'Please enter your password';
                                       }
                                       return null;
                                     },
@@ -530,8 +532,8 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                               const SizedBox(width: 12),
                                               Text(
                                                 _captchaVerified 
-                                                    ? 'CAPTCHA Verified ✓' 
-                                                    : 'Verify CAPTCHA',
+                                                    ? AppLocalizations.of(context)?.captchaVerified ?? 'CAPTCHA Verified ✓' 
+                                                    : AppLocalizations.of(context)?.verifyCaptchaButton ?? 'Verify CAPTCHA',
                                                 style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 16,
@@ -570,7 +572,7 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                         onTap: _submit,
                                         child: Center(
                                           child: Text(
-                                            'Sign In',
+                                            AppLocalizations.of(context)?.signInText ?? "Sign In",
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 18,
@@ -604,9 +606,9 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
                                               : Colors.grey[600],
                                         ),
                                         children: [
-                                          TextSpan(text: "Don't have an account? "),
+                                          TextSpan(text: AppLocalizations.of(context)?.dontHaveAccount ?? "Don't have an account? Register"),
                                           TextSpan(
-                                            text: "Register",
+                                            text: AppLocalizations.of(context)?.registerTexxt ?? "Register",
                                             style: TextStyle(
                                               color: Color(0xFF8F7193),
                                               fontWeight: FontWeight.bold,
@@ -676,6 +678,7 @@ class _SignInState extends State<SignIn> with TickerProviderStateMixin {
               ],
             ),
           ),
+          floatingActionButton: LanguageButton(),
         );
       },
     );

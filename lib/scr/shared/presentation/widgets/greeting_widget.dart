@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/greeting_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/greeting_session_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GreetingWidget extends StatefulWidget {
   const GreetingWidget({Key? key}) : super(key: key);
@@ -197,8 +198,7 @@ class _GreetingWidgetState extends State<GreetingWidget>
                                 ),
                               ),
                               const SizedBox(height: 2),
-                              Text(
-                                'Welcome to HormonalCare',
+                              Text(AppLocalizations.of(context)?.welcomeMessage ?? 'Welcome to HormonalCare!',
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.9),
                                   fontSize: 12,

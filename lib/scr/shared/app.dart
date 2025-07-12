@@ -2,19 +2,39 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/pages/home_screen_patient.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Importar el archivo generado
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/pages/home_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/presentation/pages/sign_in.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/widgets/language_switcher_app.dart';
 
 class MyApp extends StatelessWidget {
+
+  final Locale? locale;
+  final Function(Locale)? onLanguageChanged;
+
+  const MyApp({Key? key, this.locale, this.onLanguageChanged}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
-          title: 'Hormonal Care',
+          title: AppLocalizations.of(context)?.medicalCareAppTitle ?? 'Hormonal Care App',
           theme: themeProvider.isDarkMode ? _darkTheme : _lightTheme,
           home: SignIn(),
           debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', ''), // English
+            Locale('es', ''), // Spanish
+          ],
+          locale: languageProvider.locale,
         );
       },
     );

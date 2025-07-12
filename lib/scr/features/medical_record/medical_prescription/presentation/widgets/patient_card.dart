@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/models/patient_model.dart';
 import '../../../diagnosis/presentation/pages/medicalrecord_screen.dart'; // Importa la pantalla de historial médico
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PatientCard extends StatelessWidget {
   final Patient patient;
@@ -64,7 +65,7 @@ class PatientCard extends StatelessWidget {
                         fontSize: avatarRadius / 5, // Tamaño del texto del botón
                       ),
                     ),
-                    child: const Text('Medical record'),
+                    child: Text(AppLocalizations.of(context)?.medicalRecordButton ?? 'Medical record'),
                   ),
                   const SizedBox(height: 5.0),
                 ],

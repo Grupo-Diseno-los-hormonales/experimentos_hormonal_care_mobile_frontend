@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/data/data_sources/remote/medical_appointment_api.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class JitsiMeetingLinkGenerator {
   static const String _baseUrl = 'https://meet.jit.si/';
@@ -117,7 +119,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Appointment updated successfully!')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.updateAppointmentButton ?? 'Appointment updated successfully!')),
         );
         Navigator.of(context).pop(true); // Return true to indicate success
       } else {
@@ -229,7 +231,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
         ),
         backgroundColor: Color(0xFFA78AAB),
         title: Text(
-          'Edit Appointment',
+          AppLocalizations.of(context)?.editAppointmentTitle ?? 'Edit Appointment',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -271,7 +273,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                         child: TextField(
                           controller: _titleController,
                           decoration: InputDecoration(
-                            labelText: 'Title',
+                            labelText: AppLocalizations.of(context)?.titleTab ?? 'Title',
                             border: InputBorder.none,
                           ),
                           style: TextStyle(fontSize: 18),
@@ -364,7 +366,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: _updateAppointment,
-          child: Text('Save', style: TextStyle(color: Colors.white)),
+          child: Text(AppLocalizations.of(context)?.saveButton ?? 'Save', style: TextStyle(color: Colors.white)),
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(0xFF8F7193),
             shape: RoundedRectangleBorder(

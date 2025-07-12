@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/presentation/screens/add_appointment.dart';
-import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/presentation/screens/appointment_detail.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/profile/data/data_sources/remote/patient_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/profile/data/data_sources/remote/profile_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/data/data_sources/remote/medical_appointment_api.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:intl/intl.dart'; // ✅ SOLO AGREGADO - Para formatear la fecha
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 class HomePatientsScreen extends StatefulWidget {
   final int doctorId;
@@ -104,35 +104,32 @@ class _HomePatientsScreenState extends State<HomePatientsScreen> {
     return age;
   }
 
-  // ✅ SOLO AGREGADO - Función para obtener la fecha actual en inglés
-  String _getCurrentDateFormatted() {
+  // Función para obtener la fecha actual formateada según el idioma
+  String _getCurrentDateFormatted(BuildContext context) {
     final now = DateTime.now();
-    final formatter = DateFormat('EEEE, MMMM d, y', 'en_US');
+    final locale = Localizations.localeOf(context);
+    final formatter = DateFormat('EEEE, MMMM d, y', locale.toString());
     return formatter.format(now);
   }
 
 @override
 Widget build(BuildContext context) {
-  final limaTimeZone = tz.getLocation('America/Lima');
-  final now = tz.TZDateTime.now(limaTimeZone);
-
   return Scaffold(
     appBar: AppBar(
       backgroundColor: const Color(0xFF8F7193), // Fondo morado del AppBar
       title: Column(
-        mainAxisSize: MainAxisSize.min, // ✅ SOLO AGREGADO
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            "Today's Patients",
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)?.todaysPatientsTitle ?? "Today's Patients",
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20.0,
               fontWeight: FontWeight.bold,
             ),
           ),
-          // ✅ SOLO AGREGADO - Subtítulo con la fecha actual en inglés
           Text(
-            _getCurrentDateFormatted(),
+            _getCurrentDateFormatted(context),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14.0,
@@ -170,7 +167,7 @@ Widget build(BuildContext context) {
                     children: [
                       Expanded(
                         child: Text(
-                          'Name',
+                          AppLocalizations.of(context)?.nameHeader ?? 'Name',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -181,7 +178,7 @@ Widget build(BuildContext context) {
                       ),
                       Expanded(
                         child: Text(
-                          'Date',
+                          AppLocalizations.of(context)?.dateHeader ?? 'Date',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -208,11 +205,6 @@ Widget build(BuildContext context) {
                                   padding: EdgeInsets.zero,
                                   itemCount: patients.length,
                                   itemBuilder: (context, index) {
-                                    final eventDate = tz.TZDateTime.from(
-                                        DateTime.parse(patients[index]['eventDate']!),
-                                        limaTimeZone);
-                                    final isPast = eventDate.isBefore(now);
-
                                     final today = DateTime.now();
                                     final startTime = DateTime.parse(
                                         "${today.toIso8601String().split('T')[0]} ${patients[index]['time']!}");
@@ -243,9 +235,8 @@ Widget build(BuildContext context) {
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFF000000),
                                           ),
-                                        ),
-                                        subtitle: Text(
-                                          "${patients[index]['age']} years old",
+                                        ),                        subtitle: Text(
+                          "${patients[index]['age']} ${AppLocalizations.of(context)?.yearsOld ?? 'years old'}",
                                           style: TextStyle(color: Color(0xFF4A4A4A)),
                                         ),
                                         trailing: Text(
@@ -296,7 +287,7 @@ Widget build(BuildContext context) {
               padding: EdgeInsets.symmetric(vertical: 13),
             ),
             child: Text(
-              'Reassign date',
+              AppLocalizations.of(context)?.reassignDateButton ?? 'Reassign date',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // ✅ NUEVO: Imports agregados para cerrar sesión
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/domain/services/auth_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/presentation/pages/sign_in.dart';
@@ -172,8 +173,8 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
     // Validar que ambos campos estén completos
     if (_glucoseController.text.isEmpty || _insulinController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in both glucose and insulin values'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.pleaseFillBothValuesMessage ??  "Please fill in both glucose and insulin values"),
           backgroundColor: Colors.red,
         ),
       );
@@ -186,8 +187,8 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
     
     if (glucoseValue == null || insulinValue == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter valid numbers'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.pleaseEnterValidNumbersMessage ??  "Please enter valid numbers"),
           backgroundColor: Colors.red,
         ),
       );
@@ -219,8 +220,8 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
     
     // Mostrar mensaje de éxito
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Log saved successfully!'),
+      SnackBar(
+        content: Text(AppLocalizations.of(context)?.logSaved ?? "Log saved successfully!"),
         backgroundColor: Colors.green,
       ),
     );
@@ -248,13 +249,13 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
             return AlertDialog(
               backgroundColor: themeProvider.isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
               title: Text(
-                'Confirm Logout',
+                AppLocalizations.of(context)?.confirmLogoutTitle ?? 'Confirm Logout',
                 style: TextStyle(
                   color: themeProvider.isDarkMode ? Colors.white : Color(0xFF8F7193),
                 ),
               ),
               content: Text(
-                'Are you sure you want to log out?',
+                AppLocalizations.of(context)?.sureLogOut ?? "Are you sure you want to log out?",
                 style: TextStyle(
                   color: themeProvider.isDarkMode ? Colors.white70 : Color(0xFFA788AB),
                 ),
@@ -262,7 +263,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
               actions: <Widget>[
                 TextButton(
                   child: Text(
-                    'Cancel',
+                    AppLocalizations.of(context)?.cancelButton ?? 'Cancel',
                     style: TextStyle(
                       color: themeProvider.isDarkMode ? Colors.white70 : Color(0xFF8F7193),
                     ),
@@ -309,8 +310,8 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
             backgroundColor: themeProvider.isDarkMode 
                 ? Color(0xFF2D2D2D) 
                 : Color(0xFF8F7193),
-            title: const Text(
-              'Treatment Tracker',
+            title: Text(
+              AppLocalizations.of(context)?.treatmentTrackerTitle ?? 'Treatment Tracker',
               style: TextStyle(color: Colors.white),
             ),
             centerTitle: true,
@@ -432,7 +433,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                         Divider(color: themeProvider.isDarkMode ? Color(0xFF4A4A4A) : Colors.grey.shade300),
                         const SizedBox(height: 8),
                         Text(
-                          "Keep going like this!",
+                          AppLocalizations.of(context)?.keepGoingMessage ?? "Keep going like this!",
                           style: TextStyle(
                             fontWeight: FontWeight.w500,
                             color: themeProvider.isDarkMode ? Colors.white70 : Colors.grey,
@@ -445,7 +446,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                   
                   // Sección de hoy
                   Text(
-                    "Today",
+                    AppLocalizations.of(context)?.todayTitle ?? "Today",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -464,7 +465,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                     child: Row(
                       children: [
                         Text(
-                          "Blood glucose",
+                          AppLocalizations.of(context)?.bloodGlucoseLabel ??  "Blood glucose",
                           style: TextStyle(
                             fontSize: 16,
                             color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -508,7 +509,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                     child: Row(
                       children: [
                         Text(
-                          "Insulin",
+                          AppLocalizations.of(context)?.insulinLabel ?? "Insulin",
                           style: TextStyle(
                             fontSize: 16,
                             color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -555,8 +556,8 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Text(
-                          "Save",
+                        child: Text(
+                          AppLocalizations.of(context)?.saveButton ??  "Save",
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -566,7 +567,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                   
                   // Historial de registros
                   Text(
-                    "LOG HISTORY",
+                    AppLocalizations.of(context)?.logHistoryTitle ?? "LOG HISTORY",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -581,7 +582,7 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                               child: Padding(
                                 padding: EdgeInsets.all(16.0),
                                 child: Text(
-                                  "No logs yet",
+                                  AppLocalizations.of(context)?.noLogsYetMessage ?? "No logs yet",
                                   style: TextStyle(
                                     color: themeProvider.isDarkMode ? Colors.white70 : Colors.black87,
                                   ),
@@ -633,8 +634,8 @@ class _TreatmentTrackerScreenState extends State<TreatmentTrackerScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                       icon: const Icon(Icons.support_agent, color: Colors.white),
-                      label: const Text(
-                        'Soporte HormonalCare',
+                      label: Text(
+                        AppLocalizations.of(context)?.hormonalCareSupportButton ?? 'Soporte HormonalCare',
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       onPressed: () {

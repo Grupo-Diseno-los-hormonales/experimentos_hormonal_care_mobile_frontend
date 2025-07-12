@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/data/data_sources/remote/medical_appointment_api.dart';
 import 'dart:math';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class JitsiMeetingLinkGenerator {
   static const String _baseUrl = 'https://meet.jit.si/';
@@ -115,7 +116,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Add Appointment',
+          AppLocalizations.of(context)?.addAppointmentTitle ?? 'Add Appointment',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -137,20 +138,20 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
             children: [
               _buildTextField(
                 controller: _titleController,
-                labelText: 'Title',
+                labelText: AppLocalizations.of(context)?.titleLabel ?? 'Title',
                 icon: Icons.title,
               ),
               SizedBox(height: 16),
               _buildDateField(
                 controller: _dateController,
-                labelText: 'Date',
+                labelText: AppLocalizations.of(context)?.dateLabel ?? 'Date',
                 icon: Icons.calendar_today,
                 onTap: () => _selectDate(context),
               ),
               SizedBox(height: 16),
               _buildTextField(
                 controller: _startTimeController,
-                labelText: 'Start Time (HH:MM)',
+                labelText: AppLocalizations.of(context)?.startTimeLabel ?? 'Start Time (HH:MM)',
                 icon: Icons.access_time,
                 keyboardType: TextInputType.number,
                 inputFormatters: [TimeTextInputFormatter()],
@@ -158,7 +159,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
               SizedBox(height: 16),
               _buildTextField(
                 controller: _endTimeController,
-                labelText: 'End Time (HH:MM)',
+                labelText: AppLocalizations.of(context)?.endTimeLabel ?? 'End Time (HH:MM)',
                 icon: Icons.access_time,
                 keyboardType: TextInputType.number,
                 inputFormatters: [TimeTextInputFormatter()],
@@ -177,7 +178,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     _selectedPatientId = value;
                   });
                 },
-                labelText: 'Choose a Patient',
+                labelText: AppLocalizations.of(context)?.choosePatientLabel ?? 'Choose a Patient',
                 icon: Icons.person,
               ),
               SizedBox(height: 16),
@@ -200,7 +201,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     _selectedColor = value!;
                   });
                 },
-                labelText: 'Choose a Color',
+                labelText: AppLocalizations.of(context)?.chooseColorLabel ?? 'Choose a Color',
                 icon: Icons.color_lens,
               ),
               SizedBox(height: 20),
@@ -225,7 +226,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
 
                   if (_selectedPatientId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Please choose a patient')),
+                      SnackBar(content: Text(AppLocalizations.of(context)?.pleaseChoosePatientMessage ?? 'Please choose a patient')),
                     );
                     return;
                   }
@@ -246,7 +247,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                   await _createAppointment(appointmentData);
                 },
                 child: Text(
-                  'Add Appointment',
+                  AppLocalizations.of(context)?.addAppointmentButton ?? 'Add Appointment',
                   style: TextStyle(color: Colors.white, fontSize: 18), // Aumenta el tamaño del texto
                 ),
                 style: ElevatedButton.styleFrom(

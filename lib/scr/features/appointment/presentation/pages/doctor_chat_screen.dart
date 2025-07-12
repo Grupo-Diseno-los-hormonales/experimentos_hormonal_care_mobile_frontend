@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DoctorChatScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;

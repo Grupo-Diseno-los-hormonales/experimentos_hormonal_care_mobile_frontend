@@ -10,6 +10,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/notice
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/data/theme_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/greeting_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -199,26 +200,26 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: _isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: AppLocalizations.of(context)?.homeTab ?? 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
-            label: 'Patients',
+            label: AppLocalizations.of(context)?.patientsTab ?? 'Patients',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
-            label: 'Appointments',
+            label: AppLocalizations.of(context)?.appointmentsTab ?? 'Appointments',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
-            label: 'Notifications',
+            label: AppLocalizations.of(context)?.notificationsTab ?? 'Notifications',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: AppLocalizations.of(context)?.profileTab ?? 'Profile',
           ),
         ],
         currentIndex: _selectedIndex,

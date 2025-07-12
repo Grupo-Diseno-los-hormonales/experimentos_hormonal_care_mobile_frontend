@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppointmentDoctorDetail extends StatefulWidget {
   final int appointmentId;
@@ -113,8 +114,8 @@ class _AppointmentDoctorDetailState extends State<AppointmentDoctorDetail> {
               Navigator.of(context).pop();
             },
           ),
-          title: const Text(
-            'Appointment Detail',
+          title: Text(
+            AppLocalizations.of(context)?.appointmentDetailsTitle ?? 'Appointment Detail',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -136,8 +137,8 @@ class _AppointmentDoctorDetailState extends State<AppointmentDoctorDetail> {
             Navigator.of(context).pop();
           },
         ),
-        title: const Text(
-          'Appointment Detail',
+        title: Text(
+          AppLocalizations.of(context)?.appointmentDetailsTitle ?? 'Appointment Detail',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -250,8 +251,8 @@ class _AppointmentDoctorDetailState extends State<AppointmentDoctorDetail> {
                         }
                       },
                       icon: const Icon(Icons.link, color: Colors.blue),
-                      label: const Text(
-                        'Join Meeting',
+                      label: Text(
+                        AppLocalizations.of(context)?.joinMetting ??'Join Meeting',
                         style: TextStyle(color: Colors.blue),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -270,8 +271,8 @@ class _AppointmentDoctorDetailState extends State<AppointmentDoctorDetail> {
               child: ElevatedButton.icon(
                 onPressed: _navigateToChatScreen,
                 icon: const Icon(Icons.chat, color: Colors.white),
-                label: const Text(
-                  'Chat with Doctor',
+                label: Text(
+                  AppLocalizations.of(context)?.chatWithDoctorTab ?? 'Chat with Doctor',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MedicationSection extends StatelessWidget {
   final List<Map<String, String>> medications;
@@ -16,8 +17,8 @@ class MedicationSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Medication',
+        Text(
+          AppLocalizations.of(context)?.medicationLabel ?? 'Medication',
           style: TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.bold,
@@ -41,8 +42,8 @@ class MedicationSection extends StatelessWidget {
           onPressed: () {
             _showAddMedicationDialog(context);
           },
-          child: const Text(
-            'Add Medication',
+          child: Text(
+            AppLocalizations.of(context)?.addMedicationButton ?? 'Add Medication',
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -86,8 +87,8 @@ class MedicationSection extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(
-            'Add Medication',
+          title: Text(
+            AppLocalizations.of(context)?.addMedicationButton ?? 'Add Medication',
             style: TextStyle(color: Color(0xFF8F7193)), // Texto morado oscuro
           ),
           content: Column(

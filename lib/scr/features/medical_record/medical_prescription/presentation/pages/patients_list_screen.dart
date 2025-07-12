@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/models/patient_model.dart';
 import '../widgets/patient_card.dart';
 import '../../domain/models/services/patients_list_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PatientsListScreen extends StatefulWidget {
   const PatientsListScreen({super.key});
@@ -25,7 +26,7 @@ class _PatientsListScreenState extends State<PatientsListScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF8F7193),
-        title: const Text('Patients'),
+        title: Text(AppLocalizations.of(context)?.patientsTitle ?? 'Patients'),
         centerTitle: true,
         titleTextStyle: const TextStyle(
           color: Colors.white,

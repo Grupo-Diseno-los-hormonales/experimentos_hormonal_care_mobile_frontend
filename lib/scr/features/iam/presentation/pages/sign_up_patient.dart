@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/doma
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/puzzle_captcha_dialog.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SignUpPatient extends StatefulWidget {
   @override
@@ -43,7 +43,7 @@ class _SignUpPatientState extends State<SignUpPatient> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Términos y Condiciones',
+                    AppLocalizations.of(context)!.termsAndConditionsTitle,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -114,13 +114,13 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Aceptar'),
+                    child: Text(AppLocalizations.of(context)!.acceptTermsButton),
                   ),
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
                     child: Text(
-                      'Rechazar',
+                      AppLocalizations.of(context)!.rejectTermsButton,
                       style: TextStyle(
                         color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
@@ -151,7 +151,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('CAPTCHA verificado correctamente'),
+          content: Text(AppLocalizations.of(context)!.captchaVerifiedSuccess),
           backgroundColor: Colors.green,
         ),
       );
@@ -162,13 +162,13 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
     if (!_formKey.currentState!.validate()) return;
     if (!_captchaVerified) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, verifica el CAPTCHA')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseVerifyCaptcha)),
       );
       return;
     }
     if (!_termsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Debes aceptar los términos y condiciones')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.mustAcceptTermsAndConditions)),
       );
       return;
     }
@@ -189,7 +189,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Registro exitoso'),
+          content: Text(AppLocalizations.of(context)!.registrationSuccessful),
           backgroundColor: Colors.green,
         ),
       );
@@ -197,7 +197,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error en el registro: $e'),
+          content: Text('${AppLocalizations.of(context)!.registrationErrorPrefix}$e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -268,7 +268,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            'Patient Registration',
+                            AppLocalizations.of(context)!.patientRegistrationTitle,
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -278,7 +278,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Create your account to access medical services',
+                            AppLocalizations.of(context)!.createAccountDescription,
                             style: TextStyle(
                               fontSize: 16,
                               color: themeProvider.isDarkMode 
@@ -314,10 +314,10 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                             // First Name
                             _buildTextField(
                               controller: _firstNameController,
-                              label: 'First Name',
-                              hint: 'Enter your first name',
+                              label: AppLocalizations.of(context)!.firstNameLabel,
+                              hint: AppLocalizations.of(context)!.enterFirstNameHint,
                               icon: Icons.person_outline,
-                              validator: (value) => value?.isEmpty ?? true ? 'Please enter first name' : null,
+                              validator: (value) => value?.isEmpty ?? true ? AppLocalizations.of(context)!.pleaseEnterFirstName : null,
                               themeProvider: themeProvider,
                             ),
                             const SizedBox(height: 20),
@@ -325,10 +325,10 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                             // Last Name
                             _buildTextField(
                               controller: _lastNameController,
-                              label: 'Last Name',
-                              hint: 'Enter your last name',
+                              label: AppLocalizations.of(context)!.lastNameLabel,
+                              hint: AppLocalizations.of(context)!.enterLastNameHint,
                               icon: Icons.person_outline,
-                              validator: (value) => value?.isEmpty ?? true ? 'Please enter last name' : null,
+                              validator: (value) => value?.isEmpty ?? true ? AppLocalizations.of(context)!.pleaseEnterLastName : null,
                               themeProvider: themeProvider,
                             ),
                             const SizedBox(height: 20),
@@ -336,14 +336,14 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                             // Username (en lugar de email)
                             _buildTextField(
                               controller: _usernameController,
-                              label: 'Username',
-                              hint: 'Enter your username',
+                              label: AppLocalizations.of(context)!.usernameLabel,
+                              hint: AppLocalizations.of(context)!.enterUsernameHint,
                               icon: Icons.account_circle_outlined,
                               validator: (value) {
-                                if (value?.isEmpty ?? true) return 'Please enter username';
-                                if (value!.length < 3) return 'Username must be at least 3 characters';
+                                if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.pleaseEnterUsername;
+                                if (value!.length < 3) return AppLocalizations.of(context)!.usernameMinLength;
                                 if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
-                                  return 'Username can only contain letters, numbers and underscore';
+                                  return AppLocalizations.of(context)!.usernameInvalidChars;
                                 }
                                 return null;
                               },
@@ -354,13 +354,13 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                             // Password
                             _buildTextField(
                               controller: _passwordController,
-                              label: 'Password',
-                              hint: 'Enter your password',
+                              label: AppLocalizations.of(context)!.passwordLabel,
+                              hint: AppLocalizations.of(context)!.enterPasswordHint,
                               icon: Icons.lock_outline,
                               obscureText: true,
                               validator: (value) {
-                                if (value?.isEmpty ?? true) return 'Please enter password';
-                                if (value!.length < 6) return 'Password must be at least 6 characters';
+                                if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.pleaseEnterPassword;
+                                if (value!.length < 6) return AppLocalizations.of(context)!.passwordMinLength;
                                 return null;
                               },
                               themeProvider: themeProvider,
@@ -370,11 +370,11 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                             // Phone Number
                             _buildTextField(
                               controller: _phoneNumberController,
-                              label: 'Phone Number',
-                              hint: 'Enter your phone number',
+                              label: AppLocalizations.of(context)!.phoneNumberLabel,
+                              hint: AppLocalizations.of(context)!.enterPhoneNumberHint,
                               icon: Icons.phone_outlined,
                               keyboardType: TextInputType.phone,
-                              validator: (value) => value?.isEmpty ?? true ? 'Please enter phone number' : null,
+                              validator: (value) => value?.isEmpty ?? true ? AppLocalizations.of(context)!.pleaseEnterPhoneNumber : null,
                               themeProvider: themeProvider,
                             ),
                             const SizedBox(height: 20),
@@ -390,10 +390,10 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                             // Blood Type
                             _buildTextField(
                               controller: _typeOfBloodController,
-                              label: 'Blood Type',
-                              hint: 'e.g., O+, A-, B+',
+                              label: AppLocalizations.of(context)!.bloodTypeLabel,
+                              hint: AppLocalizations.of(context)!.enterBloodTypeHint,
                               icon: Icons.bloodtype_outlined,
-                              validator: (value) => value?.isEmpty ?? true ? 'Please enter blood type' : null,
+                              validator: (value) => value?.isEmpty ?? true ? AppLocalizations.of(context)!.pleaseEnterBloodType : null,
                               themeProvider: themeProvider,
                             ),
                             const SizedBox(height: 20),
@@ -401,16 +401,16 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                             // Doctor ID
                             _buildTextField(
                               controller: _doctorIdController,
-                              label: 'Doctor ID',
-                              hint: 'Enter doctor ID (1-10)',
+                              label: AppLocalizations.of(context)!.doctorIdLabel,
+                              hint: AppLocalizations.of(context)!.enterDoctorIdHint,
                               icon: Icons.medical_services_outlined,
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                               validator: (value) {
-                                if (value?.isEmpty ?? true) return 'Please enter doctor ID';
+                                if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.pleaseEnterDoctorId;
                                 final id = int.tryParse(value!);
                                 if (id == null || id < 1 || id > 10) {
-                                  return 'Doctor ID must be between 1 and 10';
+                                  return AppLocalizations.of(context)!.doctorIdRangeError;
                                 }
                                 return null;
                               },
@@ -449,7 +449,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                                   onTap: _submit,
                                   child: Center(
                                     child: Text(
-                                      'Register Patient',
+                                      AppLocalizations.of(context)!.registerPatientButton,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 18,
@@ -467,7 +467,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                             TextButton(
                               onPressed: () => Navigator.pop(context),
                               child: Text(
-                                'Already have an account? Sign In',
+                                AppLocalizations.of(context)!.alreadyHaveAccountSignIn,
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontSize: 16,
@@ -563,7 +563,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Gender',
+          AppLocalizations.of(context)!.genderLabel,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -581,7 +581,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
           child: DropdownButtonFormField<String>(
             value: _gender,
             decoration: InputDecoration(
-              hintText: 'Select your gender',
+              hintText: AppLocalizations.of(context)!.selectGenderHint,
               prefixIcon: Icon(
                 Icons.person_outline,
                 color: Color(0xFF8F7193),
@@ -600,14 +600,18 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
-            items: ['Male', 'Female', 'Other'].map((String value) {
+            items: [
+              AppLocalizations.of(context)!.maleGender,
+              AppLocalizations.of(context)!.femaleGender,
+              AppLocalizations.of(context)!.otherGender
+            ].map((String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),
               );
             }).toList(),
             onChanged: (value) => setState(() => _gender = value),
-            validator: (value) => value == null ? 'Please select gender' : null,
+            validator: (value) => value == null ? AppLocalizations.of(context)!.pleaseSelectGender : null,
           ),
         ),
       ],
@@ -619,7 +623,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Birthday',
+          AppLocalizations.of(context)!.birthdayLabel,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -659,7 +663,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                 fontSize: 16,
               ),
               decoration: InputDecoration(
-                hintText: 'Select your birthday',
+                hintText: AppLocalizations.of(context)!.selectBirthdayHint,
                 prefixIcon: Icon(
                   Icons.calendar_today,
                   color: Color(0xFF8F7193),
@@ -689,7 +693,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                   vertical: 16,
                 ),
               ),
-              validator: (value) => value?.isEmpty ?? true ? 'Please select birthday' : null,
+              validator: (value) => value?.isEmpty ?? true ? AppLocalizations.of(context)!.pleaseSelectBirthday : null,
             ),
           ),
         ),
@@ -718,7 +722,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              _captchaVerified ? 'CAPTCHA Verified' : 'Verify you are human',
+              _captchaVerified ? AppLocalizations.of(context)!.captchaVerifiedStatus : AppLocalizations.of(context)!.verifyYouAreHuman,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -736,7 +740,7 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text('Verify'),
+              child: Text(AppLocalizations.of(context)!.verifyButton),
             ),
         ],
       ),
@@ -768,9 +772,9 @@ Este Acuerdo entrará en vigencia desde el momento en que el usuario acceda por 
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
                 children: [
-                  TextSpan(text: 'I accept the '),
+                  TextSpan(text: AppLocalizations.of(context)!.iAcceptThe),
                   TextSpan(
-                    text: 'Terms and Conditions',
+                    text: AppLocalizations.of(context)!.termsAndConditions,
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
                       decoration: TextDecoration.underline,

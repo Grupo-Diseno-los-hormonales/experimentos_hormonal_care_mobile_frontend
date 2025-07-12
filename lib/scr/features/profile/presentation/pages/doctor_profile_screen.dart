@@ -10,6 +10,7 @@ import '../widgets/profile_field_widget.dart';
 import '../widgets/edit_mode_doctor_widget.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/presentation/pages/sign_in.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
   @override
@@ -88,13 +89,13 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
             return AlertDialog(
               backgroundColor: themeProvider.isDarkMode ? Color(0xFF2D2D2D) : Colors.white,
               title: Text(
-                'Confirm Logout',
+                AppLocalizations.of(context)?.confirmLogoutTitle ?? 'Confirm Logout',
                 style: TextStyle(
                   color: themeProvider.isDarkMode ? Colors.white : Color(0xFF8F7193),
                 ),
               ),
               content: Text(
-                'Are you sure you want to log out?',
+                AppLocalizations.of(context)?.sureLogOut ?? 'Are you sure you want to log out?',
                 style: TextStyle(
                   color: themeProvider.isDarkMode ? Colors.white70 : Color(0xFFA788AB),
                 ),
@@ -102,7 +103,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               actions: <Widget>[
                 TextButton(
                   child: Text(
-                    'Cancel',
+                    AppLocalizations.of(context)?.cancelButton ?? 'Cancel',
                     style: TextStyle(
                       color: themeProvider.isDarkMode ? Colors.white70 : Color(0xFF8F7193),
                     ),
@@ -113,7 +114,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 ),
                 TextButton(
                   child: Text(
-                    'Yes',
+                    AppLocalizations.of(context)?.yesButton ?? 'Yes',
                     style: TextStyle(
                       color: themeProvider.isDarkMode ? Colors.white : Color(0xFF8F7193),
                     ),
@@ -147,8 +148,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
           backgroundColor: themeProvider.isDarkMode ? Color(0xFF1E1E1E) : Color(0xFFF5F5F5),
           appBar: AppBar(
             backgroundColor: themeProvider.isDarkMode ? Color(0xFF2D2D2D) : Color(0xFF8F7193),
-            title: const Text(
-              'Doctor Profile',
+            title: Text(
+              AppLocalizations.of(context)?.doctorProfileTitle ?? 'Doctor Profile',
               style: TextStyle(color: Colors.white),
             ),
             centerTitle: true,
@@ -221,8 +222,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                       icon: const Icon(Icons.support_agent, color: Colors.white),
-                      label: const Text(
-                        'Support Chat',
+                      label: Text(
+                        AppLocalizations.of(context)?.supportChatButton ?? 'Support Chat',
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       onPressed: _openSupportChat,
@@ -269,13 +270,13 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _buildProfileField("First Name", doctorProfile['fullName'] ?? ''),
-                                    _buildProfileField("Last Name", doctorProfile['lastName'] ?? ''),
-                                    _buildProfileField("Gender", doctorProfile['gender'] ?? ''),
-                                    _buildProfileField("Phone Number", doctorProfile['phoneNumber'] ?? ''),
-                                    _buildProfileField("Birthday", doctorProfile['birthday'] ?? ''),
-                                    _buildProfileField("Professional ID Number", doctorProfile['professionalIdentificationNumber']?.toString() ?? ''),
-                                    _buildProfileField("SubSpecialty", doctorProfile['subSpecialty'] ?? ''),
+                                    _buildProfileField(AppLocalizations.of(context)!.firstNameLabel, doctorProfile['fullName'] ?? ''),
+                                    _buildProfileField(AppLocalizations.of(context)!.lastNameLabel, doctorProfile['lastName'] ?? ''),
+                                    _buildProfileField(AppLocalizations.of(context)!.genderLabel, doctorProfile['gender'] ?? ''),
+                                    _buildProfileField(AppLocalizations.of(context)!.phoneNumberLabel, doctorProfile['phoneNumber'] ?? ''),
+                                    _buildProfileField(AppLocalizations.of(context)!.birthdayLabel, doctorProfile['birthday'] ?? ''),
+                                    _buildProfileField(AppLocalizations.of(context)!.professionalIdNumberLabel, doctorProfile['professionalIdentificationNumber']?.toString() ?? ''),
+                                    _buildProfileField(AppLocalizations.of(context)!.subSpecialtyLabel, doctorProfile['subSpecialty'] ?? ''),
                                   ],
                                 ),
                               ),

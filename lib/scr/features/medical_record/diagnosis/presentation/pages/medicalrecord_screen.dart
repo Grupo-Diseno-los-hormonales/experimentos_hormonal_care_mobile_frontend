@@ -3,6 +3,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 //import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
@@ -242,10 +243,10 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> with SingleTi
         unselectedLabelColor: Color(0xFF8F7193), // Color del texto no seleccionado
         labelStyle: TextStyle(fontWeight: FontWeight.bold),
         tabs: [
-          Tab(text: 'Patient History'),
-          Tab(text: 'Diagnosis & Treatments'),
-          Tab(text: 'Chat with Patient'),
-          Tab(text: 'External Reports')
+          Tab(text: AppLocalizations.of(context)?.patientHistoryTab ?? 'Patient History'),
+          Tab(text: AppLocalizations.of(context)?.diagnosisTreatmentsTab ?? 'Diagnosis & Treatments'),
+          Tab(text: AppLocalizations.of(context)?.chatWithPatientTab ?? 'Chat with Patient'),
+          Tab(text: AppLocalizations.of(context)?.externalReportsTab ?? 'External Reports')
         ],
       ),
     );
@@ -273,7 +274,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> with SingleTi
          mainAxisAlignment: MainAxisAlignment.spaceBetween,
          children: [
            Text(
-             'Personal history:',
+             AppLocalizations.of(context)?.personalHistoryLabel ?? 'Personal history:',
              style: TextStyle(
                fontSize: 18,
                fontWeight: FontWeight.bold,
@@ -297,7 +298,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> with SingleTi
          mainAxisAlignment: MainAxisAlignment.spaceBetween,
          children: [
            Text(
-             'Family history:',
+             AppLocalizations.of(context)?.familyHistoryLabel ?? 'Family history:',
              style: TextStyle(
                fontSize: 18,
                fontWeight: FontWeight.bold,
@@ -441,7 +442,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Diagnosis',
+                                AppLocalizations.of(context)?.diagnosisLabel ?? 'Diagnosis',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -489,7 +490,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                                       builder: (context) => _AddPrescriptionDialog(medicalRecordId),
                                     );
                                   },
-                                  child: Text('Add Diagnosis'),
+                                  child: Text(AppLocalizations.of(context)?.addDiagnosisButton ?? 'Add Diagnosis'),
                                 ),
                               ),
                             ],
@@ -507,7 +508,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Medication',
+                                AppLocalizations.of(context)?.medicationLabel ?? 'Medication',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -520,7 +521,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      'Medication',
+                                      AppLocalizations.of(context)?.medicationLabel ?? 'Medication',
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -529,7 +530,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      'Concentration',
+                                      AppLocalizations.of(context)?.concentrationLabel ?? 'Concentration',
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
@@ -539,7 +540,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      'Unit',
+                                      AppLocalizations.of(context)?.unitLabel ?? 'Unit',
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
@@ -549,7 +550,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      'Frequency',
+                                      AppLocalizations.of(context)?.frequencyLabel ?? 'Frequency',
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
@@ -611,7 +612,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                                       builder: (context) => _AddMedicationDialog(medicalRecordId),
                                     );
                                   },
-                                  child: Text('Add Medication'),
+                                  child: Text(AppLocalizations.of(context)?.addMedicationButton ?? 'Add Medication'),
                                 ),
                               ),
                             ],
@@ -629,7 +630,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Treatment',
+                                AppLocalizations.of(context)?.treatmentLabel ?? 'Treatment',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -665,7 +666,7 @@ Widget _buildDiagnosisAndTreatmentsTab(int medicalRecordId) {
                                       builder: (context) => _AddTreatmentDialog(medicalRecordId),
                                     );
                                   },
-                                  child: Text('Add Treatment'),
+                                  child: Text(AppLocalizations.of(context)?.addTreatmentButton ?? 'Add Treatment'),
                                 ),
                               ),
                             ],
@@ -1093,7 +1094,7 @@ Widget _buildExternalReportsTab(int patientId) {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No external reports found'));
+            return Center(child: Text(AppLocalizations.of(context)?.noExternalReportsMessage ?? 'No external reports found'));
           } else {
             final reports = snapshot.data!;
             return ListView.builder(
@@ -1555,7 +1556,7 @@ Widget build(BuildContext context) {
                             : Colors.black87,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Type a message...',
+                        hintText: AppLocalizations.of(context)?.typeMessageHint ?? 'Type a message...',
                         hintStyle: TextStyle(
                           color: themeProvider.isDarkMode 
                               ? Colors.white54 

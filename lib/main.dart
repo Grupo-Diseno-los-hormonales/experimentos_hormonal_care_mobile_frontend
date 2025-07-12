@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/widgets/language_switcher_app.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/presentation/pages/sign_in.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/app.dart';
@@ -12,7 +13,7 @@ void main() async {
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
-      child: MyApp(),
+      child: LanguageSwitcherApp(child: SignIn()),
     ),
   );
 }

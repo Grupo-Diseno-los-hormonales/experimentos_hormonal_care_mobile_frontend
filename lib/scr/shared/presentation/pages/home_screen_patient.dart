@@ -4,8 +4,9 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/medical_
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/medical_record/diagnosis/domain/services/medicalrecord_service.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/treatment_tracker/presentation/pages/treatment_tracker_screen.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/custom_bottom_navigation_bar.dart';
-import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/presentation/widgets/greeting_widget.dart';
+import 'package:experimentos_hormonal_care_mobile_frontend/widgets/language_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,12 +36,8 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
   int? _medicalRecordId;
   
   // Lista de exámenes
-  final List<ExamItem> _examItems = [
-    ExamItem(controller: TextEditingController(text: "Hormonal test"), isChecked: false),
-    ExamItem(controller: TextEditingController(text: "Blood test"), isChecked: false),
-    ExamItem(controller: TextEditingController(), isChecked: false),
-    ExamItem(controller: TextEditingController(), isChecked: false),
-  ];
+  late List<ExamItem> _examItems;
+  bool _examItemsInitialized = false;
   
   // Lista de archivos seleccionados
   List<PlatformFile> _selectedFiles = [];
@@ -48,10 +45,6 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
   @override
   void initState() {
     super.initState();
-    // Inicializar listeners para los exámenes
-    for (var item in _examItems) {
-      _addExamTextFieldListener(item.controller);
-    }
     
     // Cargar medicaciones
     _loadMedicalRecordId().then((_) {
@@ -59,6 +52,21 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
         _loadMedications();
       }
     });
+  }
+  
+  // Inicializar la lista de exámenes con traducciones
+  void _initializeExamItems(BuildContext context) {
+    _examItems = [
+      ExamItem(controller: TextEditingController(text: AppLocalizations.of(context)?.hormonalTestLabel ?? "Hormonal test"), isChecked: false),
+      ExamItem(controller: TextEditingController(text: AppLocalizations.of(context)?.bloodTestLabel ?? "Blood test"), isChecked: false),
+      ExamItem(controller: TextEditingController(), isChecked: false),
+      ExamItem(controller: TextEditingController(), isChecked: false),
+    ];
+    
+    // Inicializar listeners para los exámenes
+    for (var item in _examItems) {
+      _addExamTextFieldListener(item.controller);
+    }
   }
   
   // Cargar el ID del registro médico desde SharedPreferences
@@ -76,7 +84,7 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
     } catch (e) {
       print('Error loading medical record ID: $e');
       setState(() {
-        _errorMessage = 'Error loading patient data';
+        _errorMessage = AppLocalizations.of(context)?.errorLoadingPatientDataMessage ?? 'Error loading patient data';
         _isLoading = false;
       });
     }
@@ -86,7 +94,7 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
   Future<void> _loadMedications() async {
     if (_medicalRecordId == null) {
       setState(() {
-        _errorMessage = 'No medical record ID found';
+        _errorMessage = AppLocalizations.of(context)?.noMedicalRecordIdFoundMessage ?? 'No medical record ID found';
         _isLoading = false;
       });
       return;
@@ -108,7 +116,7 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
     } catch (e) {
       print('Error loading medications: $e');
       setState(() {
-        _errorMessage = 'Error loading medications';
+        _errorMessage = AppLocalizations.of(context)?.errorLoadingMedicationsMessage ?? 'Error loading medications';
         _isLoading = false;
       });
     }
@@ -119,7 +127,10 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
     controller.addListener(() {
       if (_examItems.isNotEmpty && _examItems.last.controller.text.isNotEmpty) {
         setState(() {
-          _examItems.add(ExamItem(controller: TextEditingController(), isChecked: false));
+          _examItems.add(ExamItem(
+            controller: TextEditingController(),
+            isChecked: false,
+          ));
           _addExamTextFieldListener(_examItems.last.controller);
         });
       }
@@ -142,15 +153,28 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
           setState(() {
             _selectedFiles = result.files;
           });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)?.filesSelectedMessage(_selectedFiles.length) ?? '${_selectedFiles.length} file(s) selected'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error selecting files: $e')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.errorSelectingFilesMessage(e.toString()) ?? 'Error selecting files: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Storage permission required')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.storagePermissionRequiredMessage ?? 'Storage permissions are required to select files'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -168,16 +192,68 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
     }
     
     if (parts.isEmpty) {
-      return 'No dosage info';
+      return AppLocalizations.of(context)?.noDosageInfoLabel ?? 'No dosage info';
     }
     
-    return parts.join(' - ');
+    String result = parts.join(' - ');
+    
+    // Traducir patrones específicos conocidos usando AppLocalizations
+    if (result.contains('injection') && result.contains('units')) {
+      // Extraer el número de unidades usando regex
+      RegExp regExp = RegExp(r'(\d+)\s*units');
+      Match? match = regExp.firstMatch(result);
+      if (match != null) {
+        String units = match.group(1) ?? '10';
+        final localization = AppLocalizations.of(context);
+        if (localization != null) {
+          return localization.injectionUnitsLabel(units);
+        }
+      }
+    }
+    
+    return result;
   }
   
   // Formatear la información de frecuencia
   String _formatFrequency(Medication medication) {
     if (medication.frequency != null && medication.frequency!.isNotEmpty && medication.frequency != 'Unknown') {
-      return medication.frequency!;
+      String freq = medication.frequency!;
+      
+      // Traducir patrones específicos conocidos usando AppLocalizations
+      if (freq.contains('times per day') || freq.contains('time per day')) {
+        // Extraer el número de veces usando regex
+        RegExp regExp = RegExp(r'(\d+)\s*times?\s*per\s*day');
+        Match? match = regExp.firstMatch(freq);
+        if (match != null) {
+          String times = match.group(1) ?? '1';
+          final localization = AppLocalizations.of(context);
+          if (localization != null) {
+            // Para español, usar singular para "1" y plural para el resto
+            if (times == '1') {
+              return localization.timesPerDayLabel(times).replaceAll('vez', 'vez');
+            } else {
+              return localization.timesPerDayLabel(times).replaceAll('vez', 'veces');
+            }
+          }
+        }
+      }
+      
+      // Traducir "daily" 
+      if (freq.toLowerCase() == 'daily') {
+        return AppLocalizations.of(context)?.dailyLabel ?? freq;
+      }
+      
+      // Traducir "weekly"
+      if (freq.toLowerCase() == 'weekly') {
+        return AppLocalizations.of(context)?.weeklyLabel ?? freq;
+      }
+      
+      // Traducir "monthly"
+      if (freq.toLowerCase() == 'monthly') {
+        return AppLocalizations.of(context)?.monthlyLabel ?? freq;
+      }
+      
+      return freq;
     }
     return '';
   }
@@ -194,294 +270,351 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
 
   @override
   Widget build(BuildContext context) {
+    // Inicializar exámenes con traducciones solo una vez
+    if (!_examItemsInitialized) {
+      _initializeExamItems(context);
+      _examItemsInitialized = true;
+    }
+    
     return Scaffold(
-      body: Stack( // Stack para superponer el saludo
-        children: [
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header con logo y título
-                  Row(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE2D1F4),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "HC",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepPurple,
-                            ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header con logo y título
+                Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2D1F4),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "HC",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "HormonalCare",
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      "HormonalCare",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Botón de recarga
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: _loadMedications,
+                      tooltip: AppLocalizations.of(context)?.reloadMedicationsTooltip ?? 'Reload medications',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Título de medicación y contador
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)?.todayMedicationTitle ?? "Today's medication",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      AppLocalizations.of(context)?.medicationsCount(_medications.length) ?? "${_medications.length} medications",
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                const Divider(height: 1, thickness: 1),
+                const SizedBox(height: 32),
+                
+                // Mostrar indicador de carga o mensaje de error
+                if (_isLoading)
+                  const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFFBFA2C7),
+                    ),
+                  )
+                else if (_errorMessage.isNotEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        _errorMessage,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                // Mostrar mensaje si no hay medicaciones
+                else if (_medications.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        AppLocalizations.of(context)?.noMedicationsFoundMessage ?? "No medications found",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: Colors.deepPurple,
                         ),
                       ),
-                      const Spacer(),
-                      // Botón de recarga
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
-                        onPressed: _loadMedications,
-                        tooltip: 'Reload medications',
-                      ),
-                    ],
+                    ),
+                  )
+                // Mostrar lista de medicaciones
+                else
+                  ...List.generate(_medications.length, (index) {
+                    final medication = _medications[index];
+                    return Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFBFA2C7),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Título de la medicación
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context)?.medicationNumberTitle(index + 1) ?? "Medication ${index + 1}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              
+                              // Nombre y dosis de la medicación
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Nombre del medicamento
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.medication, size: 20, color: Colors.deepPurple),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            medication.drugName ?? (AppLocalizations.of(context)?.unknownMedicationLabel ?? 'Unknown medication'),
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Divider(height: 1),
+                                    const SizedBox(height: 8),
+                                    
+                                    // Dosis
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.scale, size: 20, color: Colors.deepPurple),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '${AppLocalizations.of(context)?.dosageLabel ?? "Dosage:"} ${_formatDosage(medication)}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    
+                                    // Frecuencia (si está disponible)
+                                    if (medication.frequency != null && medication.frequency!.isNotEmpty && medication.frequency != 'Unknown')
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8.0),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.schedule, size: 20, color: Colors.deepPurple),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              '${AppLocalizations.of(context)?.frequencyLabel ?? "Frequency:"} ${_formatFrequency(medication)}',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    
+                                    // Duración (si está disponible)
+                                    if (medication.duration != null && medication.duration!.isNotEmpty && medication.duration != 'Unknown')
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8.0),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.date_range, size: 20, color: Colors.deepPurple),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              '${AppLocalizations.of(context)?.durationLabel ?? "Duration:"} ${medication.duration}',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }),
+                
+                const SizedBox(height: 16),
+                
+                // Sección de exámenes
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFBFA2C7),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // Título de medicación y contador
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Today's medication",
+                      Text(
+                        AppLocalizations.of(context)?.examsToEvaluateTitle ?? "Exams to evaluate",
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        "${_medications.length} medications",
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  const Divider(height: 1, thickness: 1),
-                  const SizedBox(height: 32),
-                  
-                  // Mostrar indicador de carga o mensaje de error
-                  if (_isLoading)
-                    const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFBFA2C7),
-                      ),
-                    )
-                  else if (_errorMessage.isNotEmpty)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          _errorMessage,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 16,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )
-                  // Mostrar mensaje si no hay medicaciones
-                  else if (_medications.isEmpty)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text(
-                          "No medications found",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    )
-                  // Mostrar lista de medicaciones
-                  else
-                    ...List.generate(_medications.length, (index) {
-                      final medication = _medications[index];
-                      return Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFBFA2C7),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Título de la medicación
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Medication ${index + 1}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
+                      const SizedBox(height: 16),
+                      // Lista dinámica de exámenes
+                      ...List.generate(_examItems.length, (index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: Checkbox(
+                                  value: _examItems[index].isChecked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _examItems[index].isChecked = value ?? false;
+                                    });
+                                  },
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  side: const BorderSide(color: Colors.white),
                                 ),
-                                const SizedBox(height: 12),
-                                
-                                // Nombre y dosis de la medicación
-                                Container(
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Container(
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Nombre del medicamento
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.medication, size: 20, color: Colors.deepPurple),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              medication.drugName ?? 'Unknown medication',
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 8),
-                                      const Divider(height: 1),
-                                      const SizedBox(height: 8),
-                                      
-                                      // Dosis
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.scale, size: 20, color: Colors.deepPurple),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'Dosage: ${_formatDosage(medication)}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      
-                                      // Frecuencia (si está disponible)
-                                      if (medication.frequency != null && medication.frequency!.isNotEmpty && medication.frequency != 'Unknown')
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 8.0),
-                                          child: Row(
-                                            children: [
-                                              const Icon(Icons.schedule, size: 20, color: Colors.deepPurple),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                'Frequency: ${_formatFrequency(medication)}',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      
-                                      // Duración (si está disponible)
-                                      if (medication.duration != null && medication.duration!.isNotEmpty && medication.duration != 'Unknown')
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 8.0),
-                                          child: Row(
-                                            children: [
-                                              const Icon(Icons.date_range, size: 20, color: Colors.deepPurple),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                'Duration: ${medication.duration}',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                    ],
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  height: 50,
+                                  child: TextField(
+                                    controller: _examItems[index].controller,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: AppLocalizations.of(context)?.enterExamNameHint ?? "Enter exam name",
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 16),
-                        ],
-                      );
-                    }),
-                  
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+                
+                // Mostrar archivos seleccionados
+                if (_selectedFiles.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  
-                  // Sección de exámenes
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFBFA2C7),
+                      color: const Color(0xFFE2D1F4),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Exams to evaluate",
+                        Text(
+                          AppLocalizations.of(context)?.selectedFilesTitle ?? "Selected Files",
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        // Lista dinámica de exámenes
-                        ...List.generate(_examItems.length, (index) {
+                        const SizedBox(height: 8),
+                        ...List.generate(_selectedFiles.length, (index) {
+                          final file = _selectedFiles[index];
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
                               children: [
-                                SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: Checkbox(
-                                    value: _examItems[index].isChecked,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _examItems[index].isChecked = value ?? false;
-                                      });
-                                    },
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    side: const BorderSide(color: Colors.white),
-                                  ),
-                                ),
+                                const Icon(Icons.picture_as_pdf, color: Colors.red),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    height: 50,
-                                    child: TextField(
-                                      controller: _examItems[index].controller,
-                                      decoration: const InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: "Enter exam name",
-                                      ),
-                                    ),
+                                  child: Text(
+                                    file.name,
+                                    style: const TextStyle(fontSize: 14),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close, size: 18),
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedFiles.removeAt(index);
+                                    });
+                                  },
                                 ),
                               ],
                             ),
@@ -490,97 +623,37 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
                       ],
                     ),
                   ),
-                  
-                  // Mostrar archivos seleccionados
-                  if (_selectedFiles.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE2D1F4),
+                ],
+                
+                const SizedBox(height: 32),
+                
+                // Upload button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _pickFiles,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFBFA2C7),
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Selected Files",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ...List.generate(_selectedFiles.length, (index) {
-                            final file = _selectedFiles[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.picture_as_pdf, color: Colors.red),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      file.name,
-                                      style: const TextStyle(fontSize: 14),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close, size: 18),
-                                    onPressed: () {
-                                      setState(() {
-                                        _selectedFiles.removeAt(index);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
                     ),
-                  ],
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Upload button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _pickFiles,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFBFA2C7),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Text(
-                        "Upload your exams",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    child: Text(
+                      AppLocalizations.of(context)?.uploadExamsButton ?? "Upload your exams",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
+                ),
 
-                  
-                ],
-              ),
+                
+              ],
             ),
           ),
-          
-          // Saludo superpuesto
-          const Positioned(
-            top: 20,
-            left: 0,
-            right: 0,
-            child: GreetingWidget(),
-          ),
-        ],
+        ),
       ),
       
 
@@ -590,29 +663,37 @@ class _HomeScreenPatientState extends State<HomeScreenPatient> {
         onTap: (index) {
           switch (index) {
             case 0:
-              // Ya estamos en Home
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreenPatient()),
+              );
               break;
             case 1:
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const DoctorListScreen()),
+                MaterialPageRoute(builder: (context) => DoctorListScreen()),
               );
               break;
             case 2:
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AppointmentScreenPatient()),
+                MaterialPageRoute(builder: (context) => AppointmentScreenPatient()), //cambiar por una solo para pacientes
+
               );
               break;
             case 3:
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const TreatmentTrackerScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const TreatmentTrackerScreen(
+                        //preferredName: 'Patient',
+                        )),
               );
               break;
           }
         },
       ),
+      floatingActionButton: const LanguageButton(),
     );
   }
 }

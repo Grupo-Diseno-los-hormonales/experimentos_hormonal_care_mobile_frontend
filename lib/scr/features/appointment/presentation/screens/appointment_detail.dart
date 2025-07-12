@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/data/data_sources/remote/medical_appointment_api.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/appointment/presentation/screens/edit_appointment.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppointmentDetail extends StatefulWidget {
   final int appointmentId;
@@ -45,7 +46,7 @@ class _AppointmentDetailState extends State<AppointmentDetail> {
       final success = await _appointmentService.deleteMedicalAppointment((widget.appointmentId).toString());
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Appointment deleted successfully!')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.deletedAppointment ?? 'Appointment deleted successfully!')),
         );
         Navigator.of(context).pop(true); // Return true to indicate success
       } else {
@@ -106,7 +107,7 @@ class _AppointmentDetailState extends State<AppointmentDetail> {
           },
         ),
         title: Text(
-          'Appointment Detail',
+          AppLocalizations.of(context)?.appointmentDetailsTitle ?? 'Appointment Detail',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -196,7 +197,7 @@ class _AppointmentDetailState extends State<AppointmentDetail> {
                       },
                       icon: Icon(Icons.copy, color: Colors.blue),
                       label: Text(
-                        'Copy Link',
+                        AppLocalizations.of(context)?.copyLink ?? 'Copy Link',
                         style: TextStyle(color: Colors.blue),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -220,7 +221,7 @@ class _AppointmentDetailState extends State<AppointmentDetail> {
                       },
                       icon: Icon(Icons.link, color: Colors.blue),
                       label: Text(
-                        'Join Meeting',
+                        AppLocalizations.of(context)?.joinMetting ?? 'Join Meeting',
                         style: TextStyle(color: Colors.blue),
                       ),
                       style: ElevatedButton.styleFrom(

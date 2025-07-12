@@ -5,6 +5,7 @@ import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/pres
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/features/iam/presentation/pages/sign_up_patient.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/core/utils/usecases/jwt_storage.dart';
 import 'package:experimentos_hormonal_care_mobile_frontend/scr/shared/providers/theme_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SelectUserType extends StatelessWidget {
   @override
@@ -16,7 +17,7 @@ class SelectUserType extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: Theme.of(context).primaryColor,
             title: Text(
-              'Select Your User Type',
+              AppLocalizations.of(context)?.selectUserType ?? 'Select Your User Type',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20.0,
@@ -63,7 +64,7 @@ class SelectUserType extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Patient',
+                        AppLocalizations.of(context)?.patient ?? 'Patient',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -72,7 +73,7 @@ class SelectUserType extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Register as a patient to access medical services',
+                        AppLocalizations.of(context)?.registerAsAPatientForAccess ?? 'Register as a patient to access medical services',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
@@ -97,7 +98,7 @@ class SelectUserType extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text('Register as Patient'),
+                        child: Text(AppLocalizations.of(context)?.registerAsAPatient ?? 'Register as Patient'),
                       ),
                     ],
                   ),
@@ -130,7 +131,7 @@ class SelectUserType extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Doctor',
+                        AppLocalizations.of(context)?.doctorText ?? 'Doctor',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -139,7 +140,7 @@ class SelectUserType extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Register as a doctor to provide medical services',
+                        AppLocalizations.of(context)?.registerAsADoctorForAccess ?? 'Register as a doctor to provide medical services',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
@@ -164,7 +165,7 @@ class SelectUserType extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text('Register as Doctor'),
+                        child: Text(AppLocalizations.of(context)?.registerAsADoctor ?? 'Register as Doctor'),
                       ),
                     ],
                   ),
